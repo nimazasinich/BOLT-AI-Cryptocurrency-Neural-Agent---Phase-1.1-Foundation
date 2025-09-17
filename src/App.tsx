@@ -9,6 +9,7 @@ import { TrainingView } from './views/TrainingView';
 import { RiskView } from './views/RiskView';
 import { BacktestView } from './views/BacktestView';
 import { HealthView } from './views/HealthView';
+import { ProvidersView } from './views/ProvidersView';
 import { SettingsView } from './views/SettingsView';
 
 const AppContent: React.FC = () => {
@@ -22,6 +23,7 @@ const AppContent: React.FC = () => {
       case 'risk': return <RiskView />;
       case 'backtest': return <BacktestView />;
       case 'health': return <HealthView />;
+      case 'providers': return <ProvidersView />;
       case 'settings': return <SettingsView />;
       default: return <DashboardView />;
     }

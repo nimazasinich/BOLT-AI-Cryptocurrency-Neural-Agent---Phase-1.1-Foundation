@@ -7,6 +7,7 @@ export type NavigationView =
   | 'risk' 
   | 'backtest' 
   | 'health' 
+  | 'providers'
   | 'settings';
 
 interface NavigationContextType {

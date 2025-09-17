@@ -18,7 +18,6 @@ interface AccessibilityContextType {
 }
 
 const defaultSettings: AccessibilitySettings = {
-  }
   highContrast: false,
   reducedMotion: false,
   fontSize: 'medium',
@@ -118,7 +117,6 @@ export const AccessibilityProvider: React.FC<AccessibilityProviderProps> = ({ ch
 };
 
 export const useAccessibility = () => {
-  }
   const context = useContext(AccessibilityContext);
   if (context === undefined) {
     throw new Error('useAccessibility must be used within an AccessibilityProvider');

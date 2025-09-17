@@ -1,0 +1,445 @@
+{
+  "source": "/workspace/.bolt/dio7_code.html",
+  "count": 47,
+  "categories": {
+    "MarketData": [
+      {
+        "id": "coingecko_coingecko_com",
+        "name": "CoinGecko",
+        "url": "https://api.coingecko.com/api/v3",
+        "apiBase": "https://api.coingecko.com/api/v3",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "بدون نیاز به کلید، قیمت و دیتای بازار"
+      },
+      {
+        "id": "coinmarketcap_pro_api_coinmarketcap_com",
+        "name": "CoinMarketCap",
+        "url": "https://pro-api.coinmarketcap.com/v1",
+        "apiBase": "https://pro-api.coinmarketcap.com/v1",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "قیمت لحظه‌ای با کلید"
+      },
+      {
+        "id": "cryptocompare_min_api_cryptocompare_com",
+        "name": "CryptoCompare",
+        "url": "https://min-api.cryptocompare.com/data",
+        "apiBase": "https://min-api.cryptocompare.com/data",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "قیمت چندگانه کریپتو"
+      },
+      {
+        "id": "coinmarketcap_pro_api_coinmarketcap_com_21",
+        "name": "CoinMarketCap",
+        "url": "https://pro-api.coinmarketcap.com/v1",
+        "apiBase": "https://pro-api.coinmarketcap.com/v1",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "قیمت و اطلاعات بازار (Primary)"
+      },
+      {
+        "id": "coinmarketcapaltkey_pro_api_coinmarketcap_com",
+        "name": "CoinMarketCap (Alt Key)",
+        "url": "https://pro-api.coinmarketcap.com/v1",
+        "apiBase": "https://pro-api.coinmarketcap.com/v1",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "کلید دوم (Fallback)"
+      },
+      {
+        "id": "coingecko_coingecko_com_23",
+        "name": "CoinGecko",
+        "url": "https://api.coingecko.com/api/v3",
+        "apiBase": "https://api.coingecko.com/api/v3",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "دیتای بازار بدون کلید (Primary)"
+      },
+      {
+        "id": "cryptocompare_min_api_cryptocompare_com_24",
+        "name": "CryptoCompare",
+        "url": "https://min-api.cryptocompare.com/data",
+        "apiBase": "https://min-api.cryptocompare.com/data",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "قیمت چندگانه"
+      },
+      {
+        "id": "nomics_nomics_com",
+        "name": "Nomics",
+        "url": "https://api.nomics.com/v1",
+        "apiBase": "https://api.nomics.com/v1",
+        "category": "MarketData",
+        "auth": "apiKey",
+        "notes": "قیمت و حجم معاملات (Fallback)"
+      },
+      {
+        "id": "messari_data_messari_io",
+        "name": "Messari",
+        "url": "https://data.messari.io/api/v1",
+        "apiBase": "https://data.messari.io/api/v1",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "متریک‌های پیشرفته (Fallback)"
+      },
+      {
+        "id": "coinpaprika_coinpaprika_com",
+        "name": "CoinPaprika",
+        "url": "https://api.coinpaprika.com/v1",
+        "apiBase": "https://api.coinpaprika.com/v1",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "سرویس جایگزین قیمت (Fallback)"
+      },
+      {
+        "id": "nobitex_nobitex_ir",
+        "name": "Nobitex",
+        "url": "https://api.nobitex.ir/v2",
+        "apiBase": "https://api.nobitex.ir/v2",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "آخرین معاملات بازار ریالی (ایرانی)"
+      },
+      {
+        "id": "cointelegraph_cointelegraph_com",
+        "name": "CoinTelegraph",
+        "url": "https://api.cointelegraph.com/api/v1",
+        "apiBase": "https://api.cointelegraph.com/api/v1",
+        "category": "MarketData",
+        "auth": "none",
+        "notes": "فید مقالات CoinTelegraph (Fallback)"
+      }
+    ],
+    "News": [
+      {
+        "id": "cryptopanic_cryptopanic_com",
+        "name": "CryptoPanic",
+        "url": "https://cryptopanic.com/api/v1",
+        "apiBase": "https://cryptopanic.com/api/v1",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "جمع‌آوری اخبار"
+      },
+      {
+        "id": "newsapiorg_newsapi_org",
+        "name": "NewsAPI.org",
+        "url": "https://newsapi.org/v2",
+        "apiBase": "https://newsapi.org/v2",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "اخبار گسترده (نیاز به کلید)"
+      },
+      {
+        "id": "newsapiorg_newsapi_org_29",
+        "name": "NewsAPI.org",
+        "url": "https://newsapi.org/v2",
+        "apiBase": "https://newsapi.org/v2",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "اخبار جهانی (Primary)"
+      },
+      {
+        "id": "cryptopanic_cryptopanic_com_30",
+        "name": "CryptoPanic",
+        "url": "https://cryptopanic.com/api/v1",
+        "apiBase": "https://cryptopanic.com/api/v1",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "جمع‌آوری کننده اخبار (Primary)"
+      },
+      {
+        "id": "cryptonews_cryptonews_api_com",
+        "name": "CryptoNews",
+        "url": "https://cryptonews-api.com/api/v1",
+        "apiBase": "https://cryptonews-api.com/api/v1",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "API تخصصی اخبار کریپتو (Fallback)"
+      },
+      {
+        "id": "cryptocontrol_cryptocontrol_io",
+        "name": "CryptoControl",
+        "url": "https://cryptocontrol.io/api/v1/public",
+        "apiBase": "https://cryptocontrol.io/api/v1/public",
+        "category": "News",
+        "auth": "apiKey",
+        "notes": "اخبار محلی و جهانی (Fallback)"
+      }
+    ],
+    "Sentiment": [
+      {
+        "id": "reddit_reddit_com",
+        "name": "Reddit",
+        "url": "https://www.reddit.com/r/CryptoCurrency",
+        "apiBase": "https://www.reddit.com/r/CryptoCurrency",
+        "category": "Sentiment",
+        "auth": "none",
+        "notes": "پست‌های جدید در ردیت"
+      }
+    ],
+    "FearGreed": [],
+    "Whales": [
+      {
+        "id": "whalealert_whale_alert_io",
+        "name": "WhaleAlert",
+        "url": "https://api.whale-alert.io/v1",
+        "apiBase": "https://api.whale-alert.io/v1",
+        "category": "Whales",
+        "auth": "apiKey",
+        "notes": "ردیابی تراکنش‌های بزرگ"
+      },
+      {
+        "id": "whalealert_whale_alert_io_40",
+        "name": "WhaleAlert",
+        "url": "https://api.whale-alert.io/v1",
+        "apiBase": "https://api.whale-alert.io/v1",
+        "category": "Whales",
+        "auth": "apiKey",
+        "notes": "ردیابی تراکنش‌های بزرگ (Primary)"
+      },
+      {
+        "id": "blockchaininfo_blockchain_info",
+        "name": "Blockchain.info",
+        "url": "https://blockchain.info",
+        "apiBase": "https://blockchain.info",
+        "category": "Whales",
+        "auth": "none",
+        "notes": "تراکنش‌های تایید نشده (Fallback)"
+      },
+      {
+        "id": "arkhamintelligence_arkham_com",
+        "name": "Arkham Intelligence",
+        "url": "https://api.arkham.com/v1",
+        "apiBase": "https://api.arkham.com/v1",
+        "category": "Whales",
+        "auth": "apiKey",
+        "notes": "انتقالات کیف‌پول‌های شناخته‌شده (Fallback)"
+      }
+    ],
+    "OnChain": [
+      {
+        "id": "alternativemefg_alternative_me",
+        "name": "Alternative.me F&G",
+        "url": "https://api.alternative.me/fng",
+        "apiBase": "https://api.alternative.me/fng",
+        "category": "OnChain",
+        "auth": "none",
+        "notes": "شاخص ترس/طمع بازار"
+      },
+      {
+        "id": "defillama_llama_fi",
+        "name": "DeFiLlama",
+        "url": "https://api.llama.fi",
+        "apiBase": "https://api.llama.fi",
+        "category": "OnChain",
+        "auth": "none",
+        "notes": "آمار پلتفرم‌های دیفای"
+      },
+      {
+        "id": "alternativemefg_alternative_me_34",
+        "name": "Alternative.me F&G",
+        "url": "https://api.alternative.me/fng",
+        "apiBase": "https://api.alternative.me/fng",
+        "category": "OnChain",
+        "auth": "none",
+        "notes": "شاخص ترس/طمع"
+      },
+      {
+        "id": "glassnode_glassnode_com",
+        "name": "Glassnode",
+        "url": "https://api.glassnode.com/v1",
+        "apiBase": "https://api.glassnode.com/v1",
+        "category": "OnChain",
+        "auth": "apiKey",
+        "notes": "شاخص‌های پیشرفته درون زنجیره‌ای"
+      },
+      {
+        "id": "intotheblock_intotheblock_com",
+        "name": "IntoTheBlock",
+        "url": "https://api.intotheblock.com/v1",
+        "apiBase": "https://api.intotheblock.com/v1",
+        "category": "OnChain",
+        "auth": "apiKey",
+        "notes": "تحلیل هولدرها"
+      },
+      {
+        "id": "lunarcrush_lunarcrush_com",
+        "name": "LunarCrush",
+        "url": "https://api.lunarcrush.com/v2",
+        "apiBase": "https://api.lunarcrush.com/v2",
+        "category": "OnChain",
+        "auth": "apiKey",
+        "notes": "معیارهای اجتماعی و تعاملات"
+      },
+      {
+        "id": "santiment_santiment_net",
+        "name": "Santiment",
+        "url": "https://api.santiment.net/graphql",
+        "apiBase": "https://api.santiment.net/graphql",
+        "category": "OnChain",
+        "auth": "apiKey",
+        "notes": "احساسات اجتماعی (GraphQL)"
+      },
+      {
+        "id": "thetieio_thetie_io",
+        "name": "TheTie.io",
+        "url": "https://api.thetie.io/data",
+        "apiBase": "https://api.thetie.io/data",
+        "category": "OnChain",
+        "auth": "apiKey",
+        "notes": "تحلیل احساسات از توییتر"
+      }
+    ],
+    "Explorers": [
+      {
+        "id": "tronscan_apilist_tronscan_org",
+        "name": "TronScan",
+        "url": "https://apilist.tronscan.org/api",
+        "apiBase": "https://apilist.tronscan.org/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "جزئیات حساب و موجودی Tron"
+      },
+      {
+        "id": "bscscan_bscscan_com",
+        "name": "BscScan",
+        "url": "https://api.bscscan.com/api",
+        "apiBase": "https://api.bscscan.com/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "موجودی حساب BSC"
+      },
+      {
+        "id": "etherscan_etherscan_io",
+        "name": "Etherscan",
+        "url": "https://api.etherscan.io/api",
+        "apiBase": "https://api.etherscan.io/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "موجودی حساب ETH"
+      },
+      {
+        "id": "tronscan_tronscan_org",
+        "name": "TronScan",
+        "url": "https://api.tronscan.org/api",
+        "apiBase": "https://api.tronscan.org/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "اکسپلورر اصلی ترون (Primary)"
+      },
+      {
+        "id": "trongrid_trongrid_io",
+        "name": "TronGrid",
+        "url": "https://api.trongrid.io",
+        "apiBase": "https://api.trongrid.io",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "جایگزین برای ترون (Fallback)"
+      },
+      {
+        "id": "blockchairtron_blockchair_com",
+        "name": "Blockchair (TRON)",
+        "url": "https://api.blockchair.com/tron",
+        "apiBase": "https://api.blockchair.com/tron",
+        "category": "Explorers",
+        "auth": "none",
+        "notes": "اکسپلورر چند زنجیره‌ای (Fallback)"
+      },
+      {
+        "id": "bscscan_bscscan_com_14",
+        "name": "BscScan",
+        "url": "https://api.bscscan.com/api",
+        "apiBase": "https://api.bscscan.com/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "اکسپلورر اصلی باینانس (Primary)"
+      },
+      {
+        "id": "ankrscanbsc_ankr_com",
+        "name": "AnkrScan (BSC)",
+        "url": "https://api.ankr.com/scan/v1/bsc",
+        "apiBase": "https://api.ankr.com/scan/v1/bsc",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "موجودی از API آنکر (Fallback)"
+      },
+      {
+        "id": "etherscan_etherscan_io_16",
+        "name": "Etherscan",
+        "url": "https://api.etherscan.io/api",
+        "apiBase": "https://api.etherscan.io/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "اکسپلورر اصلی اتریوم (Primary)"
+      },
+      {
+        "id": "etherscanbackupkey_etherscan_io",
+        "name": "Etherscan (Backup Key)",
+        "url": "https://api.etherscan.io/api",
+        "apiBase": "https://api.etherscan.io/api",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "کلید دوم برای اتریوم (Fallback)"
+      },
+      {
+        "id": "infuraeth_mainnet_infura_io",
+        "name": "Infura (ETH)",
+        "url": "https://mainnet.infura.io/v3/",
+        "apiBase": "https://mainnet.infura.io/v3/",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "استعلام RPC از Infura (Fallback)"
+      },
+      {
+        "id": "alchemyeth_eth_mainnet_g_alchemy_com",
+        "name": "Alchemy (ETH)",
+        "url": "https://eth-mainnet.g.alchemy.com/v2/",
+        "apiBase": "https://eth-mainnet.g.alchemy.com/v2/",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "استعلام RPC از Alchemy (Fallback)"
+      },
+      {
+        "id": "covalent_covalenthq_com",
+        "name": "Covalent",
+        "url": "https://api.covalenthq.com/v1",
+        "apiBase": "https://api.covalenthq.com/v1",
+        "category": "Explorers",
+        "auth": "apiKey",
+        "notes": "لیست دارایی‌ها در چند زنجیره (Fallback)"
+      }
+    ],
+    "Community": [],
+    "Other": [
+      {
+        "id": "defillama_llama_fi_43",
+        "name": "DeFiLlama",
+        "url": "https://api.llama.fi",
+        "apiBase": "https://api.llama.fi",
+        "category": "Other",
+        "auth": "none",
+        "notes": "جامع‌ترین آمار دیفای"
+      },
+      {
+        "id": "defipulse_defipulse_com",
+        "name": "DeFiPulse",
+        "url": "https://api.defipulse.com/api/v1/defipulse/api",
+        "apiBase": "https://api.defipulse.com/api/v1/defipulse/api",
+        "category": "Other",
+        "auth": "apiKey",
+        "notes": "آمار TVL (نیاز به کلید)"
+      },
+      {
+        "id": "telegrambot_telegram_org",
+        "name": "Telegram Bot",
+        "url": "https://api.telegram.org/bot",
+        "apiBase": "https://api.telegram.org/bot",
+        "category": "Other",
+        "auth": "apiKey",
+        "notes": "ارسال نوتیفیکیشن از طریق ربات تلگرام"
+      }
+    ]
+  }
+}

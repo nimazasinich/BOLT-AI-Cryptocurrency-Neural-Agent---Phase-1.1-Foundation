@@ -8,7 +8,8 @@ import {
   Settings, 
   Home,
   ChevronLeft,
-  Zap
+  Zap,
+  Database
 } from 'lucide-react';
 import { useNavigation, NavigationView } from './NavigationProvider';
 import { useTheme } from '../Theme/ThemeProvider';
@@ -56,6 +57,12 @@ const navigationItems: NavigationItem[] = [
     label: 'System Health',
     icon: Activity,
     description: 'Monitoring and diagnostics'
+  },
+  {
+    id: 'providers',
+    label: 'Data Providers',
+    icon: Database,
+    description: 'Cryptocurrency data source registry'
   },
   {
     id: 'settings',

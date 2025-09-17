@@ -5,10 +5,17 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon --exec tsx src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "test": "jest"
+    "providers:sync": "npx tsx scripts/sync-providers.ts",
+    "predev": "npm run providers:sync",
+    "prebuild": "npm run providers:sync",
+    "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
+    "dev:server": "nodemon --exec tsx src/server.ts",
+    "dev:client": "vite",
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "vite build",
+    "build:server": "tsc",
+    "start": "node dist-server/server.js",
+    "test": "vitest"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.57.4",
@@ -45,7 +52,9 @@
     "@types/react-dom": "^18.3.0",
     "@types/ws": "^8.18.1",
     "@vitejs/plugin-react": "^4.3.1",
+    "@vitest/ui": "^3.2.4",
     "autoprefixer": "^10.4.18",
+    "concurrently": "^9.2.1",
     "dotenv": "^16.3.1",
     "eslint": "^9.9.1",
     "eslint-plugin-react-hooks": "^5.1.0-rc.0",
@@ -58,6 +67,7 @@
     "tsx": "^4.7.0",
     "typescript": "^5.5.3",
     "typescript-eslint": "^8.3.0",
-    "vite": "^5.4.2"
+    "vite": "^5.4.2",
+    "vitest": "^3.2.4"
   }
 }

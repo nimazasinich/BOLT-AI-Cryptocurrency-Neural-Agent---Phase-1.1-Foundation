@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import path from 'path';
 import { createServer } from 'http';
 import WebSocket from 'ws';
 import { Logger } from './core/Logger.js';
@@ -19,6 +20,7 @@ import { BacktestEngine } from './ai/BacktestEngine.js';
 import { FeatureEngineering } from './ai/FeatureEngineering.js';
 import { AlertService } from './services/AlertService.js';
 import { NotificationService } from './services/NotificationService.js';
+import { ProviderRegistry } from './services/ProviderRegistry.js';
 
 const app = express();
 const server = createServer(app);
@@ -34,6 +36,7 @@ const dataValidation = DataValidationService.getInstance();
 const emergencyFallback = EmergencyDataFallbackService.getInstance();
 const alertService = AlertService.getInstance();
 const notificationService = NotificationService.getInstance();
+const providerRegistry = ProviderRegistry.getInstance();
 
 // Initialize AI Core and Training Systems
 const { XavierInitializer, StableActivations, NetworkArchitectures } = AICore;
@@ -71,10 +74,14 @@ bullBearAgent.initialize().catch(error => {
 
 const PORT = process.env.PORT || 3001;
 
-// Middleware
-app.use(helmet());
-app.use(cors());
-app.use(express.json());
+// Middleware - Security hardening
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ 
+  origin: '*', 
+  methods: ['GET', 'POST', 'DELETE'], 
+  credentials: false 
+}));
+app.use(express.json({ limit: '1mb' }));
 
 // Request logging middleware
 app.use((req, res, next) => {
@@ -510,6 +517,111 @@ app.post('/api/ai/backtest', async (req, res) => {
   }
 });
 
+// Provider registry endpoints
+app.get('/api/providers', async (req, res) => {
+  try {
+    const bundle = await providerRegistry.getProviders();
+    
+    logger.info('Fetched all providers', {
+      count: bundle.count,
+      source: bundle.source
+    });
+    
+    res.json(bundle);
+  } catch (error) {
+    logger.error('Failed to fetch providers', {}, error as Error);
+    res.status(500).json({
+      error: 'Failed to fetch providers',
+      message: (error as Error).message
+    });
+  }
+});
+
+app.get('/api/providers/:category', async (req, res) => {
+  try {
+    const { category } = req.params;
+    
+    // Validate category
+    const validCategories = ['MarketData', 'News', 'Sentiment', 'FearGreed', 'Whales', 'OnChain', 'Explorers', 'Community', 'Other'];
+    if (!validCategories.includes(category)) {
+      return res.status(400).json({
+        error: 'Invalid category',
+        validCategories
+      });
+    }
+    
+    const providers = await providerRegistry.getProvidersByCategory(category as any);
+    
+    logger.info('Fetched providers by category', {
+      category,
+      count: providers.length
+    });
+    
+    res.json({
+      category,
+      count: providers.length,
+      providers
+    });
+  } catch (error) {
+    logger.error('Failed to fetch providers by category', { category: req.params.category }, error as Error);
+    res.status(500).json({
+      error: 'Failed to fetch providers by category',
+      message: (error as Error).message
+    });
+  }
+});
+
+app.get('/api/providers/search/:query', async (req, res) => {
+  try {
+    const { query } = req.params;
+    
+    if (!query || query.length < 2) {
+      return res.status(400).json({
+        error: 'Query must be at least 2 characters long'
+      });
+    }
+    
+    const providers = await providerRegistry.searchProviders(query);
+    
+    logger.info('Searched providers', {
+      query,
+      count: providers.length
+    });
+    
+    res.json({
+      query,
+      count: providers.length,
+      providers
+    });
+  } catch (error) {
+    logger.error('Failed to search providers', { query: req.params.query }, error as Error);
+    res.status(500).json({
+      error: 'Failed to search providers',
+      message: (error as Error).message
+    });
+  }
+});
+
+app.get('/api/providers/stats', async (req, res) => {
+  try {
+    const stats = await providerRegistry.getStatistics();
+    
+    logger.info('Fetched provider statistics', stats);
+    
+    res.json({
+      success: true,
+      statistics: stats,
+      timestamp: Date.now()
+    });
+  } catch (error) {
+    logger.error('Failed to fetch provider statistics', {}, error as Error);
+    res.status(500).json({
+      error: 'Failed to fetch provider statistics',
+      message: (error as Error).message
+    });
+  }
+});
+
 // Alert management endpoints
 app.post('/api/alerts', (req, res) => {
   try {
@@ -712,6 +824,20 @@ app.get('/api/exchange-info', async (req, res) => {
     });
   }
 });
+
+// Static file serving for production
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static('dist-client'));
+  
+  // Catch-all handler: send back React's index.html file for SPA routing
+  app.get('*', (req, res, next) => {
+    // Skip API routes
+    if (req.path.startsWith('/api/')) {
+      return next();
+    }
+    res.sendFile(path.resolve('dist-client', 'index.html'));
+  });
+}
 
 // WebSocket connection handling
 wss.on('connection', (ws) => {
