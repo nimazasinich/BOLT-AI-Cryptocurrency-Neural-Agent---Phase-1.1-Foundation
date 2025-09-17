@@ -1,0 +1,1995 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>داشبورد کامل API های کریپتو - نسخه حرفه‌ای</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg-primary: #0f0f23;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --bg-card: #0e3460;
+            --bg-glass: rgba(14, 52, 96, 0.9);
+            --text-primary: #ffffff;
+            --text-secondary: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-red: #ef4444;
+            --accent-yellow: #f59e0b;
+            --accent-purple: #8b5cf6;
+            --accent-pink: #ec4899;
+            --accent-orange: #f97316;
+            --border-color: #334155;
+            --border-glow: rgba(59, 130, 246, 0.5);
+            --shadow-base: 0 4px 20px rgba(0, 0, 0, 0.3);
+            --shadow-glow: 0 0 30px rgba(59, 130, 246, 0.4);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-success: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --gradient-danger: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Vazirmatn', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(59, 130, 246, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(139, 92, 246, 0.2) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(16, 185, 129, 0.15) 0%, transparent 50%);
+            z-index: -1;
+            animation: backgroundShift 30s ease-in-out infinite;
+        }
+
+        @keyframes backgroundShift {
+            0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.8; }
+            50% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-base);
+            margin-bottom: 30px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            animation: headerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes headerGlow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px;
+        }
+
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .logo {
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: 900;
+            animation: logoFloat 4s ease-in-out infinite;
+        }
+
+        @keyframes logoFloat {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+
+        .header-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            margin-top: 8px;
+            font-weight: 500;
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 30px;
+        }
+
+        .header-stat {
+            text-align: center;
+            padding: 15px 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .header-stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--accent-green);
+            display: block;
+        }
+
+        .header-stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            margin-top: 5px;
+        }
+
+        .live-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 12px 20px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--accent-green);
+            border-radius: 15px;
+            font-weight: 600;
+        }
+
+        .live-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 15px var(--accent-green);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(1.2); }
+        }
+
+        .search-section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-base);
+        }
+
+        .search-container {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 18px 25px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 15px;
+            color: var(--text-primary);
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .search-btn {
+            padding: 18px 35px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-base);
+        }
+
+        .search-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 12px 20px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .filter-btn.active {
+            background: var(--gradient-primary);
+            color: white;
+            border-color: transparent;
+            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: var(--bg-tertiary);
+            border-color: var(--accent-blue);
+            transform: translateY(-2px);
+        }
+
+        .badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: var(--accent-red);
+            color: white;
+            border-radius: 10px;
+            padding: 2px 6px;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+
+        .category-section {
+            display: none;
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .category-section.active {
+            display: block;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .category-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .category-title {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .category-icon {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+
+        .category-stats {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .stat-chip {
+            padding: 8px 16px;
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid var(--accent-blue);
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-blue);
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(500px, 1fr));
+            gap: 25px;
+        }
+
+        .service-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            border-radius: 20px;
+            padding: 30px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow-base);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .service-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--gradient-primary);
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .service-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-glow);
+            border-color: var(--accent-blue);
+        }
+
+        .service-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .service-info {
+            flex: 1;
+        }
+
+        .service-name {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .service-description {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .service-badges {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            align-items: flex-end;
+        }
+
+        .service-type {
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .service-type.primary {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .service-type.fallback {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--accent-yellow);
+            border: 1px solid var(--accent-yellow);
+        }
+
+        .service-type.free {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .service-type.premium {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .status-indicator-small {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-dot-small {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        .api-details {
+            display: grid;
+            gap: 20px;
+        }
+
+        .api-row {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 15px;
+            align-items: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .api-row:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent-blue);
+            transform: translateX(5px);
+        }
+
+        .api-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .api-value {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-secondary);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            word-break: break-all;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .api-value:hover {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.2);
+        }
+
+        .api-key {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(139, 92, 246, 0.1));
+            border-color: var(--accent-blue);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .copy-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
+        }
+
+        .fallbacks-section {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .fallbacks-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .fallback-item {
+            display: grid;
+            grid-template-columns: 1fr 2fr 80px;
+            gap: 10px;
+            padding: 12px;
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+        }
+
+        .fallback-name {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .fallback-url {
+            font-family: 'Courier New', monospace;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        .fallback-status {
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--bg-secondary);
+            color: var(--text-muted);
+        }
+
+        .usage-examples {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+        }
+
+        .usage-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--accent-purple);
+            margin-bottom: 10px;
+        }
+
+        .usage-code {
+            font-family: 'Courier New', monospace;
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            line-height: 1.4;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+            box-shadow: var(--shadow-base);
+        }
+
+        .notification.success {
+            background: var(--gradient-success);
+        }
+
+        .notification.error {
+            background: var(--gradient-danger);
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .floating-action {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: var(--shadow-glow);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+
+        .floating-action:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+        }
+
+        @media (max-width: 1200px) {
+            .services-grid {
+                grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
+            }
+            
+            .api-row {
+                grid-template-columns: 100px 1fr auto;
+                gap: 10px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .header-stats {
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .search-container {
+                flex-direction: column;
+            }
+
+            .filter-tabs {
+                justify-content: center;
+            }
+
+            .services-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+
+            .api-row {
+                grid-template-columns: 1fr;
+                gap: 10px;
+                text-align: right;
+            }
+
+            .fallback-item {
+                grid-template-columns: 1fr;
+                gap: 8px;
+                text-align: right;
+            }
+
+            .category-header {
+                flex-direction: column;
+                gap: 15px;
+                text-align: center;
+            }
+
+            .category-stats {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+        }
+
+        .highlight {
+            background: rgba(245, 158, 11, 0.3) !important;
+            border-color: var(--accent-yellow) !important;
+            animation: highlightPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes highlightPulse {
+            0%, 100% { 
+                box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); 
+            }
+            50% { 
+                box-shadow: 0 0 25px rgba(245, 158, 11, 0.6); 
+            }
+        }
+
+        .stats-summary {
+            margin-bottom: 20px;
+            padding: 20px;
+            background: var(--bg-glass);
+            backdrop-filter: blur(15px);
+            border-radius: 15px;
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .status-check-btn {
+            padding: 10px 15px;
+            background: var(--gradient-primary);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+            box-shadow: var(--shadow-base);
+        }
+
+        .status-check-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-glow);
+        }
+
+        .tab-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: color 0.3s ease, border-bottom 0.3s ease;
+            font-weight: 500;
+        }
+
+        .tab-button.active {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+            font-weight: 700;
+        }
+
+        .tab-content { 
+            display: none; 
+        }
+        
+        .tab-content.active { 
+            display: block; 
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">🚀</div>
+                    <div>
+                        <h1>داشبورد کامل API های کریپتو</h1>
+                        <div class="header-subtitle">مجموعه جامع 45+ سرویس تحلیل بازار، بلاک اکسپلورر و داده‌های زنجیره‌ای</div>
+                    </div>
+                </div>
+
+                <div class="header-stats">
+                    <div class="header-stat">
+                        <span class="header-stat-value" id="total-apis">45</span>
+                        <div class="header-stat-label">کل API ها</div>
+                    </div>
+                    <div class="header-stat">
+                        <span class="header-stat-value" id="active-keys">12</span>
+                        <div class="header-stat-label">کلید فعال</div>
+                    </div>
+                    <div class="header-stat">
+                        <span class="header-stat-value">8</span>
+                        <div class="header-stat-label">دسته‌بندی</div>
+                    </div>
+                    <div class="header-stat">
+                        <button class="status-check-btn" onclick="checkAllApis()">
+                            🔍 بررسی وضعیت
+                        </button>
+                    </div>
+                </div>
+
+                <div class="live-indicator">
+                    <div class="live-dot"></div>
+                    <span id="status-text">وضعیت: آنلاین</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="tab-container">
+            <button class="tab-button active" data-tab="tab1">سرویس‌های اصلی</button>
+            <button class="tab-button" data-tab="tab2">سرویس‌های کامل</button>
+        </div>
+
+        <!-- Tab 1 Content -->
+        <div id="tab1" class="tab-content active">
+            <!-- آمار کلی -->
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <div class="stat-value" id="block-explorer-count">4</div>
+                    <div class="stat-label">Block Explorer</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="market-data-count">3</div>
+                    <div class="stat-label">Market Data</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="sentiment-count">3</div>
+                    <div class="stat-label">Sentiment Analysis</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="news-count">2</div>
+                    <div class="stat-label">News & Media</div>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInput" placeholder="جستجو در سرویس‌ها، کلیدها، URL ها یا توضیحات...">
+                    <button class="search-btn" onclick="performSearch()">
+                        <span>🔍</span> جستجو
+                    </button>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterCategory('all')" data-category="all">
+                        همه سرویس‌ها <span class="badge">12</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategory('block-explorer')" data-category="block-explorer">
+                        🔗 Block Explorer <span class="badge">4</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategory('market-data')" data-category="market-data">
+                        📊 Market Data <span class="badge">3</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategory('sentiment')" data-category="sentiment">
+                        💭 Sentiment <span class="badge">3</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategory('news')" data-category="news">
+                        📰 News & Media <span class="badge">2</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- All Services Section -->
+                <div class="category-section active" id="category-all">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <span class="category-icon">🔗</span>
+                            <h2>سرویس‌های اصلی API</h2>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-chip">4 سرویس Block Explorer</div>
+                            <div class="stat-chip">3 سرویس Market Data</div>
+                            <div class="stat-chip">3 سرویس Sentiment Analysis</div>
+                        </div>
+                    </div>
+
+                    <div class="services-grid" id="services-container-tab1">
+                        <!-- Services will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2 Content -->
+        <div id="tab2" class="tab-content">
+            <!-- آمار کلی -->
+            <div class="stats-summary">
+                <div class="stat-item">
+                    <div class="stat-value" id="block-explorer-count-tab2">11</div>
+                    <div class="stat-label">Block Explorer</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="market-data-count-tab2">9</div>
+                    <div class="stat-label">Market Data</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="news-count-tab2">7</div>
+                    <div class="stat-label">News & Media</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="sentiment-count-tab2">8</div>
+                    <div class="stat-label">Sentiment Analysis</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="onchain-count-tab2">6</div>
+                    <div class="stat-label">On-Chain Analytics</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="whale-count-tab2">4</div>
+                    <div class="stat-label">Whale Tracking</div>
+                </div>
+            </div>
+
+            <!-- Search Section -->
+            <div class="search-section">
+                <div class="search-container">
+                    <input type="text" class="search-input" id="searchInputTab2" placeholder="جستجو در سرویس‌ها، کلیدها، URL ها یا توضیحات...">
+                    <button class="search-btn" onclick="performSearchTab2()">
+                        <span>🔍</span> جستجو
+                    </button>
+                </div>
+
+                <div class="filter-tabs">
+                    <button class="filter-btn active" onclick="filterCategoryTab2('all')" data-category="all">
+                        همه سرویس‌ها <span class="badge">45</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('block-explorer')" data-category="block-explorer">
+                        🔗 Block Explorer <span class="badge">11</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('market-data')" data-category="market-data">
+                        📊 Market Data <span class="badge">9</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('news')" data-category="news">
+                        📰 News & Media <span class="badge">7</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('sentiment')" data-category="sentiment">
+                        💭 Sentiment <span class="badge">8</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('onchain')" data-category="onchain">
+                        ⛓️ On-Chain <span class="badge">6</span>
+                    </button>
+                    <button class="filter-btn" onclick="filterCategoryTab2('whale')" data-category="whale">
+                        🐋 Whale Tracking <span class="badge">4</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- All Services Section -->
+                <div class="category-section active" id="category-all-tab2">
+                    <div class="category-header">
+                        <div class="category-title">
+                            <span class="category-icon">🔗</span>
+                            <h2>همه سرویس‌های API</h2>
+                        </div>
+                        <div class="category-stats">
+                            <div class="stat-chip">11 سرویس Block Explorer</div>
+                            <div class="stat-chip">9 سرویس Market Data</div>
+                            <div class="stat-chip">7 سرویس News & Media</div>
+                        </div>
+                    </div>
+
+                    <div class="services-grid" id="services-container-tab2">
+                        <!-- Services will be dynamically inserted here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <button class="floating-action" onclick="scrollToTop()">
+        ↑
+    </button>
+
+    <script>
+        // API Keys
+        const API_KEYS = {
+            NEWS_API: '968a5e25552b4cb5ba3280361d8444ab',
+            COINMARKETCAP: '04cf4b5b-9868-465c-8ba0-9f2e78c92eb1'
+        };
+
+        // Main services data for Tab 1
+        const servicesDataTab1 = [
+            {
+                id: 1,
+                name: "CoinMarketCap",
+                description: "داده‌های جامع بازار کریپتو شامل قیمت، حجم معاملات، رتبه‌بندی و اطلاعات بازار",
+                category: "market-data",
+                apiKey: API_KEYS.COINMARKETCAP,
+                apiUrl: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "CoinGecko", url: "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd", status: "active" },
+                    { name: "CryptoCompare", url: "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH&tsyms=USD", status: "active" }
+                ]
+            },
+            {
+                id: 2,
+                name: "News API",
+                description: "اخبار و مقالات به‌روز در حوزه کریپتو و بلاک‌چین از منابع معتبر جهانی",
+                category: "news",
+                apiKey: API_KEYS.NEWS_API,
+                apiUrl: "https://newsapi.org/v2/everything?q=crypto&apiKey=" + API_KEYS.NEWS_API,
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "CryptoPanic", url: "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_TOKEN&public=true", status: "active" }
+                ]
+            },
+            {
+                id: 3,
+                name: "Etherscan",
+                description: "اکسپلورر و API برای شبکه اتریوم، اطلاعات بلاک، تراکنش‌ها و قراردادهای هوشمند",
+                category: "block-explorer",
+                apiKey: "YOUR_ETHERSCAN_API_KEY",
+                apiUrl: "https://api.etherscan.io/api?module=account&action=balance&address=0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae&tag=latest&apikey=",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Infura", url: "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", status: "active" },
+                    { name: "Alchemy", url: "https://eth-mainnet.alchemyapi.io/v2/YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 4,
+                name: "Blockchain.com",
+                description: "داده‌های بیت‌کوین شامل اطلاعات آدرس‌ها، تراکنش‌ها و بلاک‌ها",
+                category: "block-explorer",
+                apiKey: "YOUR_BLOCKCHAIN_API_KEY",
+                apiUrl: "https://api.blockchain.info/stats",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Blockchair", url: "https://api.blockchair.com/bitcoin/stats", status: "active" }
+                ]
+            },
+            {
+                id: 5,
+                name: "CryptoCompare",
+                description: "داده‌های قیمتی، حجم معاملات و اطلاعات بازار برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_CRYPTOCOMPARE_API_KEY",
+                apiUrl: "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Nomics", url: "https://api.nomics.com/v1/currencies/ticker?key=YOUR_API_KEY&ids=BTC,ETH&interval=1d", status: "active" }
+                ]
+            },
+            {
+                id: 6,
+                name: "CoinGecko",
+                description: "داده‌های جامع بازار، اطلاعات پروژه‌ها، حجم معاملات و رتبه‌بندی",
+                category: "market-data",
+                apiKey: "YOUR_COINGECKO_API_KEY",
+                apiUrl: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 7,
+                name: "The Graph",
+                description: "پروتکلی برای ایندکس کردن و کوئری زدن داده‌های بلاک‌چین",
+                category: "block-explorer",
+                apiKey: "YOUR_GRAPH_API_KEY",
+                apiUrl: "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Moralis", url: "https://deep-index.moralis.io/api/v2/block/0?chain=eth&api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 8,
+                name: "Bitquery",
+                description: "پلتفرم تحلیل داده‌های بلاک‌چین با قابلیت کوئری‌های پیشرفته",
+                category: "block-explorer",
+                apiKey: "YOUR_BITQUERY_API_KEY",
+                apiUrl: "https://graphql.bitquery.io",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Dune Analytics", url: "https://api.dune.com/api/v1/query/YOUR_QUERY_ID/results?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 9,
+                name: "LunarCrush",
+                description: "تحلیل احساسات بازار و فعالیت اجتماعی پیرامون ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_LUNARCRUSH_API_KEY",
+                apiUrl: "https://lunarcrush.com/api3/coins?key=YOUR_API_KEY&symbol=BTC",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Santiment", url: "https://api.santiment.net/graphiql?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 10,
+                name: "Santiment",
+                description: "تحلیل‌های روی زنجیره و احساسات بازار برای ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_SANTIMENT_API_KEY",
+                apiUrl: "https://api.santiment.net/graphiql",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "IntoTheBlock", url: "https://api.intotheblock.com/tokens/YOUR_TOKEN_ID/metrics?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 11,
+                name: "CryptoPanic",
+                description: "گردآوری اخبار و تحلیل احساسات بازار از منابع مختلف",
+                category: "sentiment",
+                apiKey: "YOUR_CRYPTOPANIC_API_KEY",
+                apiUrl: "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_API_KEY&public=true",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 12,
+                name: "CoinCap",
+                description: "داده‌های قیمتی و بازار در زمان واقعی برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_COINCAP_API_KEY",
+                apiUrl: "https://api.coincap.io/v2/assets",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            }
+        ];
+
+        // Full services data for Tab 2 (45+ services)
+        const servicesDataTab2 = [
+            // Block Explorer Services (11)
+            {
+                id: 1,
+                name: "Etherscan",
+                description: "اکسپلورر و API برای شبکه اتریوم، اطلاعات بلاک، تراکنش‌ها و قراردادهای هوشمند",
+                category: "block-explorer",
+                apiKey: "YOUR_ETHERSCAN_API_KEY",
+                apiUrl: "https://api.etherscan.io/api?module=account&action=balance&address=0xde0b295669a9fd93d5f28d9ec85e40f4cb697bae&tag=latest&apikey=",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Infura", url: "https://mainnet.infura.io/v3/YOUR_PROJECT_ID", status: "active" },
+                    { name: "Alchemy", url: "https://eth-mainnet.alchemyapi.io/v2/YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 2,
+                name: "Blockchain.com",
+                description: "داده‌های بیت‌کوین شامل اطلاعات آدرس‌ها، تراکنش‌ها و بلاک‌ها",
+                category: "block-explorer",
+                apiKey: "YOUR_BLOCKCHAIN_API_KEY",
+                apiUrl: "https://api.blockchain.info/stats",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Blockchair", url: "https://api.blockchair.com/bitcoin/stats", status: "active" }
+                ]
+            },
+            {
+                id: 3,
+                name: "BscScan",
+                description: "اکسپلورر و API برای شبکه Binance Smart Chain",
+                category: "block-explorer",
+                apiKey: "YOUR_BSCSCAN_API_KEY",
+                apiUrl: "https://api.bscscan.com/api?module=account&action=balance&address=0x...&tag=latest&apikey=",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Ankr", url: "https://rpc.ankr.com/bsc", status: "active" }
+                ]
+            },
+            {
+                id: 4,
+                name: "PolygonScan",
+                description: "اکسپلورر و API برای شبکه Polygon (Matic)",
+                category: "block-explorer",
+                apiKey: "YOUR_POLYGONSCAN_API_KEY",
+                apiUrl: "https://api.polygonscan.com/api?module=account&action=balance&address=0x...&tag=latest&apikey=",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "QuickNode", url: "https://rpc.quicknode.com/polygon", status: "active" }
+                ]
+            },
+            {
+                id: 5,
+                name: "Solscan",
+                description: "اکسپلورر و API برای شبکه Solana",
+                category: "block-explorer",
+                apiKey: "YOUR_SOLSCAN_API_KEY",
+                apiUrl: "https://public-api.solscan.io/account/...",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Solana RPC", url: "https://api.mainnet-beta.solana.com", status: "active" }
+                ]
+            },
+            {
+                id: 6,
+                name: "The Graph",
+                description: "پروتکلی برای ایندکس کردن و کوئری زدن داده‌های بلاک‌چین",
+                category: "block-explorer",
+                apiKey: "YOUR_GRAPH_API_KEY",
+                apiUrl: "https://api.thegraph.com/subgraphs/name/uniswap/uniswap-v2",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Moralis", url: "https://deep-index.moralis.io/api/v2/block/0?chain=eth&api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 7,
+                name: "Bitquery",
+                description: "پلتفرم تحلیل داده‌های بلاک‌چین با قابلیت کوئری‌های پیشرفته",
+                category: "block-explorer",
+                apiKey: "YOUR_BITQUERY_API_KEY",
+                apiUrl: "https://graphql.bitquery.io",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Dune Analytics", url: "https://api.dune.com/api/v1/query/YOUR_QUERY_ID/results?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 8,
+                name: "BlockCypher",
+                description: "API برای بیت‌کوین، اتریوم و سایر بلاک‌چین‌ها",
+                category: "block-explorer",
+                apiKey: "YOUR_BLOCKCYPHER_API_KEY",
+                apiUrl: "https://api.blockcypher.com/v1/btc/main",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 9,
+                name: "TRONScan",
+                description: "اکسپلورر و API برای شبکه TRON",
+                category: "block-explorer",
+                apiKey: "YOUR_TRONSCAN_API_KEY",
+                apiUrl: "https://api.tronscan.org/api/account?address=",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 10,
+                name: "Algorand Indexer",
+                description: "API برای کوئری داده‌های شبکه Algorand",
+                category: "block-explorer",
+                apiKey: "YOUR_ALGORAND_API_KEY",
+                apiUrl: "https://algoindexer.algoexplorerapi.io/v2/accounts/",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 11,
+                name: "Avalanche Explorer",
+                description: "اکسپلورر و API برای شبکه Avalanche",
+                category: "block-explorer",
+                apiKey: "YOUR_AVALANCHE_API_KEY",
+                apiUrl: "https://api.snowtrace.io/api?module=account&action=balance&address=0x...&tag=latest&apikey=",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            // Market Data Services (9)
+            {
+                id: 12,
+                name: "CoinMarketCap",
+                description: "داده‌های جامع بازار کریپتو شامل قیمت، حجم معاملات، رتبه‌بندی و اطلاعات بازار",
+                category: "market-data",
+                apiKey: API_KEYS.COINMARKETCAP,
+                apiUrl: "https://pro-api.coinmarketcap.com/v1/cryptocurrency/listings/latest",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "CoinGecko", url: "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd", status: "active" },
+                    { name: "CryptoCompare", url: "https://min-api.cryptocompare.com/data/pricemultifull?fsyms=BTC,ETH&tsyms=USD", status: "active" }
+                ]
+            },
+            {
+                id: 13,
+                name: "CoinGecko",
+                description: "داده‌های جامع بازار، اطلاعات پروژه‌ها، حجم معاملات و رتبه‌بندی",
+                category: "market-data",
+                apiKey: "YOUR_COINGECKO_API_KEY",
+                apiUrl: "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 14,
+                name: "CryptoCompare",
+                description: "داده‌های قیمتی، حجم معاملات و اطلاعات بازار برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_CRYPTOCOMPARE_API_KEY",
+                apiUrl: "https://min-api.cryptocompare.com/data/price?fsym=BTC&tsyms=USD,JPY,EUR",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Nomics", url: "https://api.nomics.com/v1/currencies/ticker?key=YOUR_API_KEY&ids=BTC,ETH&interval=1d", status: "active" }
+                ]
+            },
+            {
+                id: 15,
+                name: "Nomics",
+                description: "داده‌های بازار کریپتو با تمرکز بر شفافیت و دقت",
+                category: "market-data",
+                apiKey: "YOUR_NOMICS_API_KEY",
+                apiUrl: "https://api.nomics.com/v1/currencies/ticker?key=YOUR_API_KEY&ids=BTC,ETH&interval=1d",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 16,
+                name: "Kaiko",
+                description: "داده‌های بازار و قیمت‌های تاریخی برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_KAIKO_API_KEY",
+                apiUrl: "https://us.market-api.kaiko.io/v2/data/trades.v1/spot_exchange_rate/...",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 17,
+                name: "CoinCap",
+                description: "داده‌های قیمتی و بازار در زمان واقعی برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_COINCAP_API_KEY",
+                apiUrl: "https://api.coincap.io/v2/assets",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 18,
+                name: "Messari",
+                description: "داده‌های بازار، تحقیقات و تحلیل‌های عمیق در حوزه کریپتو",
+                category: "market-data",
+                apiKey: "YOUR_MESSARI_API_KEY",
+                apiUrl: "https://data.messari.io/api/v1/assets/bitcoin/metrics",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 19,
+                name: "CoinMetrics",
+                description: "داده‌های بازار و معیارهای شبکه برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_COINMETRICS_API_KEY",
+                apiUrl: "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=PriceUSD",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 20,
+                name: "Brave New Coin",
+                description: "داده‌های قیمتی و شاخص‌های بازار برای ارزهای دیجیتال",
+                category: "market-data",
+                apiKey: "YOUR_BNC_API_KEY",
+                apiUrl: "https://bravenewcoin.p.rapidapi.com/market-cap?assetId=...",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            // News & Media Services (7)
+            {
+                id: 21,
+                name: "News API",
+                description: "اخبار و مقالات به‌روز در حوزه کریپتو و بلاک‌چین از منابع معتبر جهانی",
+                category: "news",
+                apiKey: API_KEYS.NEWS_API,
+                apiUrl: "https://newsapi.org/v2/everything?q=crypto&apiKey=" + API_KEYS.NEWS_API,
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "CryptoPanic", url: "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_TOKEN&public=true", status: "active" }
+                ]
+            },
+            {
+                id: 22,
+                name: "CryptoPanic",
+                description: "گردآوری اخبار و تحلیل احساسات بازار از منابع مختلف",
+                category: "news",
+                apiKey: "YOUR_CRYPTOPANIC_API_KEY",
+                apiUrl: "https://cryptopanic.com/api/v1/posts/?auth_token=YOUR_API_KEY&public=true",
+                type: "fallback",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 23,
+                name: "Watcher.Guru",
+                description: "اخبار و اطلاعات بازار کریپتو به صورت لحظه‌ای",
+                category: "news",
+                apiKey: "YOUR_WATCHERGURU_API_KEY",
+                apiUrl: "https://api.watcher.guru/news",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 24,
+                name: "CryptoControl",
+                description: "پلتفرم اخبار و تحلیل‌های کریپتو با قابلیت فیلتر کردن محتوا",
+                category: "news",
+                apiKey: "YOUR_CRYPTO_CONTROL_API_KEY",
+                apiUrl: "https://cryptocontrol.io/api/v1/public/news?key=YOUR_API_KEY",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 25,
+                name: "The Block",
+                description: "اخبار، تحلیل‌ها و تحقیقات در حوزه بلاک‌چین و کریپتو",
+                category: "news",
+                apiKey: "YOUR_THEBLOCK_API_KEY",
+                apiUrl: "https://api.theblock.com/api/v1/news",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 26,
+                name: "CoinDesk",
+                description: "منبع معتبر اخبار و اطلاعات بازار کریپتو",
+                category: "news",
+                apiKey: "YOUR_COINDESK_API_KEY",
+                apiUrl: "https://api.coindesk.com/v1/bpi/currentprice.json",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 27,
+                name: "CryptoBriefing",
+                description: "اخبار، تحلیل‌ها و بررسی‌های عمیق در حوزه کریپتو",
+                category: "news",
+                apiKey: "YOUR_CRYPTOBRIEFING_API_KEY",
+                apiUrl: "https://cryptobriefing.com/api/v1/news",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            // Sentiment Analysis Services (8)
+            {
+                id: 28,
+                name: "LunarCrush",
+                description: "تحلیل احساسات بازار و فعالیت اجتماعی پیرامون ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_LUNARCRUSH_API_KEY",
+                apiUrl: "https://lunarcrush.com/api3/coins?key=YOUR_API_KEY&symbol=BTC",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "Santiment", url: "https://api.santiment.net/graphiql?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 29,
+                name: "Santiment",
+                description: "تحلیل‌های روی زنجیره و احساسات بازار برای ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_SANTIMENT_API_KEY",
+                apiUrl: "https://api.santiment.net/graphiql",
+                type: "primary",
+                status: "active",
+                fallbacks: [
+                    { name: "IntoTheBlock", url: "https://api.intotheblock.com/tokens/YOUR_TOKEN_ID/metrics?api_key=YOUR_API_KEY", status: "active" }
+                ]
+            },
+            {
+                id: 30,
+                name: "IntoTheBlock",
+                description: "تحلیل‌های روی زنجیره و هوش بازار برای سرمایه‌گذاران",
+                category: "sentiment",
+                apiKey: "YOUR_INTOTHEBLOCK_API_KEY",
+                apiUrl: "https://api.intotheblock.com/tokens/YOUR_TOKEN_ID/metrics?api_key=YOUR_API_KEY",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 31,
+                name: "Alternative.me",
+                description: "شاخص ترس و طمع بیت‌کوین و سایر ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_ALTERNATIVE_API_KEY",
+                apiUrl: "https://api.alternative.me/fng/?limit=10",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 32,
+                name: "TheTIE",
+                description: "داده‌های احساسات بازار و تحلیل‌های اجتماعی برای ارزهای دیجیتال",
+                category: "sentiment",
+                apiKey: "YOUR_THETIE_API_KEY",
+                apiUrl: "https://api.thetie.io/sentiment?symbol=BTC",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 33,
+                name: "TradeTheChain",
+                description: "تحلیل احساسات بازار بر اساس فعالیت رسانه‌های اجتماعی",
+                category: "sentiment",
+                apiKey: "YOUR_TRADETHECHAIN_API_KEY",
+                apiUrl: "https://api.tradethechain.com/sentiment?symbol=BTC",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 34,
+                name: "SocialMarketAnalytics",
+                description: "تحلیل احساسات بازار بر اساس داده‌های اجتماعی",
+                category: "sentiment",
+                apiKey: "YOUR_SMA_API_KEY",
+                apiUrl: "https://api.socialmarketanalytics.com/v1/sentiment?symbol=BTC",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 35,
+                name: "Stocktwits",
+                description: "پلتفرم اجتماعی برای تریدرها و تحلیل احساسات بازار",
+                category: "sentiment",
+                apiKey: "YOUR_STOCKTWITS_API_KEY",
+                apiUrl: "https://api.stocktwits.com/api/2/streams/symbol/BTC.json",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            // On-Chain Analytics Services (6)
+            {
+                id: 36,
+                name: "Glassnode",
+                description: "داده‌های جامع روی زنجیره و تحلیل‌های شبکه برای بیت‌کوین و اتریوم",
+                category: "onchain",
+                apiKey: "YOUR_GLASSNODE_API_KEY",
+                apiUrl: "https://api.glassnode.com/v1/metrics/market/price_usd_close",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 37,
+                name: "CoinMetrics",
+                description: "داده‌های روی زنجیره و معیارهای شبکه برای تحلیل‌های پیشرفته",
+                category: "onchain",
+                apiKey: "YOUR_COINMETRICS_API_KEY",
+                apiUrl: "https://community-api.coinmetrics.io/v4/timeseries/asset-metrics?assets=btc&metrics=AdrActCnt",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 38,
+                name: "Dune Analytics",
+                description: "پلتفرم کوئری‌نویسی و تجسم داده‌های بلاک‌چین",
+                category: "onchain",
+                apiKey: "YOUR_DUNE_API_KEY",
+                apiUrl: "https://api.dune.com/api/v1/query/YOUR_QUERY_ID/results?api_key=YOUR_API_KEY",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 39,
+                name: "Nansen",
+                description: "تحلیل‌های روی زنجیره و ردیابی کیف پول‌های نهنگ‌ها",
+                category: "onchain",
+                apiKey: "YOUR_NANSEN_API_KEY",
+                apiUrl: "https://api.nansen.ai/v1/...",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 40,
+                name: "TokenAnalyst",
+                description: "تحلیل داده‌های روی زنجیره و فعالیت‌های شبکه",
+                category: "onchain",
+                apiKey: "YOUR_TOKENANALYST_API_KEY",
+                apiUrl: "https://api.tokenanalyst.io/analytics/...",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 41,
+                name: "CryptoQuant",
+                description: "داده‌های روی زنجیره و تحلیل‌های بازار برای بیت‌کوین و آلت‌کوین‌ها",
+                category: "onchain",
+                apiKey: "YOUR_CRYPTOQUANT_API_KEY",
+                apiUrl: "https://api.cryptoquant.com/v1/btc/exchange-flows?window=24h",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            // Whale Tracking Services (4)
+            {
+                id: 42,
+                name: "Whale Alert",
+                description: "ردیابی تراکنش‌های بزرگ و فعالیت نهنگ‌ها در بازار کریپتو",
+                category: "whale",
+                apiKey: "YOUR_WHALEALERT_API_KEY",
+                apiUrl: "https://api.whale-alert.io/v1/transactions?api_key=YOUR_API_KEY",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 43,
+                name: "WhaleWatcher",
+                description: "مانیتورینگ فعالیت نهنگ‌ها و تراکنش‌های بزرگ در بلاک‌چین",
+                category: "whale",
+                apiKey: "YOUR_WHALEWATCHER_API_KEY",
+                apiUrl: "https://api.whalewatcher.finance/transactions",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 44,
+                name: "WhaleBot",
+                description: "ردیابی لحظه‌ای فعالیت نهنگ‌ها و هشدارهای معاملاتی",
+                category: "whale",
+                apiKey: "YOUR_WHALEBOT_API_KEY",
+                apiUrl: "https://api.whalebot.io/v1/alerts",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            },
+            {
+                id: 45,
+                name: "WhaleStats",
+                description: "تحلیل‌های آماری فعالیت نهنگ‌ها و تراکنش‌های بزرگ",
+                category: "whale",
+                apiKey: "YOUR_WHALESTATS_API_KEY",
+                apiUrl: "https://api.whalestats.com/v1/...",
+                type: "primary",
+                status: "active",
+                fallbacks: []
+            }
+        ];
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initTabs();
+            renderServicesTab1();
+            renderServicesTab2();
+            updateStatistics();
+        });
+
+        // Initialize tab functionality
+        function initTabs() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabContents = document.querySelectorAll('.tab-content');
+
+            tabButtons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const tabId = button.getAttribute('data-tab');
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    button.classList.add('active');
+                    document.getElementById(tabId).classList.add('active');
+                    performSearch(tabId === 'tab1' ? 'searchInput' : 'searchInputTab2');
+                });
+            });
+        }
+
+        // Render services for Tab 1
+        function renderServicesTab1() {
+            const container = document.getElementById('services-container-tab1');
+            container.innerHTML = '';
+            servicesDataTab1.forEach(service => {
+                const serviceCard = createServiceCard(service);
+                container.appendChild(serviceCard);
+            });
+        }
+
+        // Render services for Tab 2
+        function renderServicesTab2() {
+            const container = document.getElementById('services-container-tab2');
+            container.innerHTML = '';
+            servicesDataTab2.forEach(service => {
+                const serviceCard = createServiceCard(service);
+                container.appendChild(serviceCard);
+            });
+        }
+
+        // Create service card HTML
+        function createServiceCard(service) {
+            const card = document.createElement('div');
+            card.className = 'service-card';
+            card.dataset.category = service.category;
+            card.dataset.id = service.id;
+
+            let typeBadge = '';
+            if (service.type === 'primary') {
+                typeBadge = `<span class="service-type primary">اصلی</span>`;
+            } else if (service.type === 'fallback') {
+                typeBadge = `<span class="service-type fallback">آلترنیتیو</span>`;
+            } else if (service.type === 'free') {
+                typeBadge = `<span class="service-type free">رایگان</span>`;
+            } else if (service.type === 'premium') {
+                typeBadge = `<span class="service-type premium">پرمیوم</span>`;
+            }
+
+            let fallbacksHTML = '';
+            if (service.fallbacks && service.fallbacks.length > 0) {
+                fallbacksHTML = `
+                    <div class="fallbacks-section">
+                        <div class="fallbacks-title">
+                            <span>🔄 سرویس‌های جایگزین</span>
+                        </div>
+                        ${service.fallbacks.map(fallback => `
+                            <div class="fallback-item">
+                                <span class="fallback-name">${fallback.name}</span>
+                                <span class="fallback-url">${fallback.url}</span>
+                                <span class="fallback-status">${fallback.status}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            }
+
+            const usageExample = `
+                <div class="usage-examples">
+                    <div class="usage-title">نمونه استفاده</div>
+                    <div class="usage-code">
+fetch('${service.apiUrl}', {
+    headers: {
+        'Authorization': 'Bearer ${service.apiKey}',
+        'Content-Type': 'application/json'
+    }
+})
+.then(response => response.json())
+.then(data => console.log(data))
+.catch(error => console.error('Error:', error));
+                    </div>
+                </div>
+            `;
+
+            card.innerHTML = `
+                <div class="service-header">
+                    <div class="service-info">
+                        <div class="service-name">${service.name}</div>
+                        <div class="service-description">${service.description}</div>
+                    </div>
+                    <div class="service-badges">
+                        ${typeBadge}
+                        <div class="status-indicator-small">
+                            <div class="status-dot-small"></div>
+                            <span>${service.status === 'active' ? 'فعال' : 'غیرفعال'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="api-details">
+                    <div class="api-row">
+                        <span class="api-label">API URL:</span>
+                        <span class="api-value">${service.apiUrl}</span>
+                        <button class="copy-btn" onclick="copyToClipboard('${service.apiUrl}', this)">کپی</button>
+                    </div>
+                    <div class="api-row">
+                        <span class="api-label">API Key:</span>
+                        <span class="api-value api-key">${service.apiKey}</span>
+                        <button class="copy-btn" onclick="copyToClipboard('${service.apiKey}', this)">کپی</button>
+                    </div>
+                </div>
+                ${fallbacksHTML}
+                ${usageExample}
+            `;
+            return card;
+        }
+
+        // Copy to clipboard function
+        function copyToClipboard(text, button) {
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('کپی شد!', 'success');
+                button.textContent = 'کپی شد!';
+                setTimeout(() => button.textContent = 'کپی', 2000);
+            }).catch(() => {
+                showNotification('خطا در کپی کردن!', 'error');
+            });
+        }
+
+        // Show notification
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease-out';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Scroll to top function
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Update statistics
+        function updateStatistics() {
+            const activeKeys = servicesDataTab2.filter(s => s.apiKey && s.apiKey !== 'YOUR_' + s.name.toUpperCase() + '_API_KEY').length;
+            document.getElementById('active-keys').textContent = activeKeys;
+        }
+
+        // Check all APIs status
+        async function checkAllApis() {
+            document.getElementById('status-text').textContent = 'وضعیت: در حال بررسی...';
+            document.querySelector('.live-dot').style.background = 'var(--accent-yellow)';
+            
+            // Simulate API status check
+            setTimeout(() => {
+                document.getElementById('status-text').textContent = 'وضعیت: آنلاین';
+                document.querySelector('.live-dot').style.background = 'var(--accent-green)';
+                showNotification('همه API‌ها بررسی شدند!', 'success');
+            }, 2000);
+        }
+
+        // Search functionality for Tab 1
+        function performSearch() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const container = document.getElementById('services-container-tab1');
+            const cards = container.querySelectorAll('.service-card');
+
+            cards.forEach(card => {
+                const name = card.querySelector('.service-name').textContent.toLowerCase();
+                const description = card.querySelector('.service-description').textContent.toLowerCase();
+                const apiUrl = card.querySelector('.api-value:not(.api-key)').textContent.toLowerCase();
+                const apiKey = card.querySelector('.api-key').textContent.toLowerCase();
+
+                if (name.includes(searchTerm) || description.includes(searchTerm) || apiUrl.includes(searchTerm) || apiKey.includes(searchTerm)) {
+                    card.style.display = '';
+                    card.classList.add('highlight');
+                    setTimeout(() => card.classList.remove('highlight'), 2000);
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+      </script>
+</html>

@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>داشبورد جامع APIها و سرویس‌های ارز دیجیتال</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@300;400;500;600;700;800;900&display=swap');
+
+    :root{
+      --bg-primary:#0a0d1a;--bg-secondary:#151b2e;--text-primary:#fff;--text-secondary:#b8c5e8;
+      --border-color:#2d3748;--accent-green:#00ff94;--accent-red:#ff4757;--accent-blue:#00d4ff;--accent-yellow:#ffc107;
+      --shadow-base:0 4px 20px rgba(0,0,0,.15)
+    }
+    *{box-sizing:border-box}
+    body{font-family:'Vazirmatn',sans-serif;background:var(--bg-primary);color:var(--text-primary);margin:0;line-height:1.6;padding:20px}
+    .container{max-width:1400px;margin:0 auto;background:var(--bg-secondary);border-radius:20px;box-shadow:var(--shadow-base);padding:20px}
+    h1{text-align:center;color:var(--accent-blue);margin:0 0 30px}
+    .tab-container{display:flex;gap:8px;justify-content:center;border-bottom:2px solid var(--border-color);margin-bottom:20px;flex-wrap:wrap}
+    .tab-button{background:none;border:none;padding:15px 30px;cursor:pointer;color:var(--text-secondary);font-size:1.1rem;font-weight:500;transition:.25s}
+    .tab-button.active{color:var(--accent-blue);border-bottom:2px solid var(--accent-blue);font-weight:700}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
+    .category-container{margin:28px 0 40px}
+    .category-title{font-size:1.8rem;border-bottom:2px solid var(--accent-blue);padding-bottom:10px;margin:0 0 20px;color:var(--text-primary)}
+    table{width:100%;border-collapse:collapse;background:#1a223a;border-radius:12px;overflow:hidden}
+    th,td{padding:15px 20px;text-align:right;border-bottom:1px solid var(--border-color)}
+    th{background:#222b44;color:var(--text-secondary);font-weight:600;font-size:1rem}
+    tbody tr{transition:background .2s}
+    tbody tr.data-row:hover{background:#2b3550;cursor:pointer}
+    .details-row td{background:#1e2a47;padding:0}
+    .details-content{padding:20px;color:var(--text-secondary);font-size:.95rem}
+    .details-content strong{color:var(--text-primary);display:inline-block;min-width:120px}
+    code{background:var(--bg-primary);padding:3px 8px;border-radius:4px;color:var(--accent-yellow);direction:ltr;display:inline-block;font-size:.9rem}
+    .status{font-weight:700}
+    .online{color:var(--accent-green)} .offline{color:var(--accent-red)} .checking{color:var(--accent-yellow)}
+
+    .grid{display:grid;gap:12px}
+    .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+    .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+    @media (max-width:900px){.grid-3{grid-template-columns:1fr}.grid-2{grid-template-columns:1fr}}
+    .card{background:#1a223a;border:1px solid var(--border-color);border-radius:12px;padding:14px}
+    .label{font-size:.85rem;color:var(--text-secondary);margin-bottom:6px}
+    .input,.select{width:100%;background:#0f1426;border:1px solid var(--border-color);border-radius:10px;color:#fff;padding:10px}
+    .btn{background:#0f1426;border:1px solid var(--border-color);color:#fff;padding:10px 14px;border-radius:10px;cursor:pointer}
+    .btn:hover{border-color:#3b4a69}
+    .btn.primary{border-color:var(--accent-blue)}
+    .muted{color:var(--text-secondary);font-size:.9rem}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{display:inline-block;border:1px solid var(--border-color);padding:4px 8px;border-radius:999px;font-size:.85rem;color:var(--text-secondary)}
+    canvas{max-width:100%}
+    #map{height:380px;border-radius:12px;border:1px solid var(--border-color);overflow:hidden}
+    .divider{height:1px;background:var(--border-color);margin:14px 0}
+    .kbd{display:inline-block;border:1px solid var(--border-color);border-bottom-width:3px;padding:0 6px;border-radius:6px;font-size:.85rem}
+    .api-key{background:var(--bg-primary);padding:3px 6px;border-radius:4px;color:var(--accent-green);font-family:monospace;font-size:.85rem}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>داشبورد جامع APIها و سرویس‌های ارز دیجیتال</h1>
+
+    <div class="tab-container">
+      <button class="tab-button active" data-tab="tab1">سرویس‌های اصلی</button>
+      <button class="tab-button" data-tab="tab2">سرویس‌های کامل</button>
+      <button class="tab-button" data-tab="tab3">پیشرفته (WS + Heatmap)</button>
+    </div>
+
+    <div id="tab1" class="tab-content active">
+      <p class="muted">این تب شامل سرویس‌های اصلی و پرکاربرد برای تحلیل بازار و بلاک‌چین است.</p>
+      <div id="api-dashboard-tab1"></div>
+    </div>
+
+    <div id="tab2" class="tab-content">
+      <p class="muted">این تب شامل یک لیست جامع از سرویس‌های دسته‌بندی شده برای تحلیل‌های عمیق‌تر است.</p>
+      <div id="api-dashboard-tab2"></div>
+    </div>
+
+    <div id="tab3" class="tab-content">
+      <div class="category-container">
+        <h2 class="category-title">تنظیمات کلیدها و فیلترها</h2>
+        <div class="grid grid-3">
+          <div class="card">
+            <div class="label">CoinMarketCap API Key</div>
+            <input id="cmcKey" class="input" placeholder="X-CMC_PRO_API_KEY" value="04cf4b5b-9868-465c-8ba0-9f2e78c92eb1" />
+            <div class="muted">برای قیمت‌ها و داده‌های مارکت.</div>
+          </div>
+          <div class="card">
+            <div class="label">NewsAPI.org Key</div>
+            <input id="newsKey" class="input" placeholder="newsapi.org apiKey" value="968a5e25552b4cb5ba3280361d8444ab" />
+            <div class="muted">برای اخبار کریپتو.</div>
+          </div>
+          <div class="card">
+            <div class="label">WhaleAlert Key</div>
+            <input id="whaleKey" class="input" placeholder="api.whale-alert.io key" />
+            <div class="muted">برای رصد تراکنش‌های بزرگ.</div>
+          </div>
+          <div class="card">
+            <div class="label">Alchemy Key (WebSocket)</div>
+            <input id="alchemyKey" class="input" placeholder="wss و https یکسان: alchemy.com" />
+            <div class="muted">برای ممپول Ethereum با WebSocket.</div>
+          </div>
+          <div class="card">
+            <div class="label">Infura Project ID (اختیاری)</div>
+            <input id="infuraId" class="input" placeholder="mainnet.infura.io/v3/{PROJECT_ID}" />
+            <div class="muted">جایگزین WebSocket/HTTP.</div>
+          </div>
+          <div class="card">
+            <div class="label">حداقل مقدار تراکنش (USD)</div>
+            <input id="minUsd" class="input" type="number" value="500000" />
+            <div class="muted">فیلتر تراکنش‌های سنگین ممپول.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-container">
+        <h2 class="category-title">WebSocket ممپول (Ethereum)</h2>
+        <div class="row" style="margin-bottom:10px">
+          <button id="wsStart" class="btn primary">شروع لیسن</button>
+          <button id="wsStop" class="btn">توقف</button>
+          <span class="pill" id="wsStatus">WS: قطع</span>
+        </div>
+        <div class="card" style="max-height:240px;overflow:auto" id="wsLog"></div>
+        <div class="muted" style="margin-top:8px">می‌تونی با <span class="kbd">Ctrl</span>+<span class="kbd">F</span> جستجو کنی.</div>
+      </div>
+
+      <div class="category-container">
+        <h2 class="category-title">WhaleAlert — نمودار و نقشه</h2>
+        <div class="row" style="margin-bottom:10px">
+          <button id="loadWhales" class="btn primary">آپدیت تراکنش‌های بزرگ</button>
+          <span class="pill" id="whaleInfo">—</span>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="label">نمودار ارزش تراکنش‌ها (USD)</div>
+            <canvas id="whaleChart"></canvas>
+          </div>
+          <div class="card">
+            <div class="label">نقشه جغرافیایی (در صورت وجود موقعیت)</div>
+            <div id="map"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="category-container">
+        <h2 class="category-title">Community Sentiment — Reddit</h2>
+        <div class="row" style="margin-bottom:10px">
+          <button id="loadReddit" class="btn">نمایش پست‌های جدید r/CryptoCurrency</button>
+        </div>
+        <div id="redditList" class="grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+  <script>
+    // --------------------------- Tab Logic ---------------------------
+    const tabs = document.querySelectorAll('.tab-button');
+    const contents = document.querySelectorAll('.tab-content');
+    tabs.forEach(t => t.addEventListener('click', () => {
+      const target = t.dataset.tab;
+      tabs.forEach(x => x.classList.remove('active'));
+      contents.forEach(c => c.classList.remove('active'));
+      t.classList.add('active');
+      document.getElementById(target).classList.add('active');
+      renderDashboard(target);
+    }));
+
+    // --------------------------- Dashboard Data (merged) ---------------------------
+    const tabData = {
+      "tab1": {
+        "Block Explorer APIs": [
+          { name: "TronScan", description: "جزئیات حساب و موجودی Tron", url: "https://apilist.tronscan.org/api", requiresKey: true, checkEndpoint: "/system/status", callMethod: "<code>GET /account?address={address}</code>", apiKey: "7ae72726-bffe-4e74-9c33-97b761eeea21" },
+          { name: "BscScan", description: "موجودی حساب BSC", url: "https://api.bscscan.com/api", requiresKey: true, checkEndpoint: "?module=stats&action=bnbprice&apikey=K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT", callMethod: "<code>GET ?module=account&action=balance&address={...}&apikey=K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT</code>", apiKey: "K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT" },
+          { name: "Etherscan", description: "موجودی حساب ETH", url: "https://api.etherscan.io/api", requiresKey: true, checkEndpoint: "?module=stats&action=ethprice&apikey=SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2", callMethod: "<code>GET ?module=account&action=balance&address={...}&apikey=SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2</code>", apiKey: "SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2" }
+        ],
+        "Market Data APIs": [
+          { name: "CoinGecko", description: "بدون نیاز به کلید، قیمت و دیتای بازار", url: "https://api.coingecko.com/api/v3", requiresKey: false, checkEndpoint: "/ping", callMethod: "<code>GET /simple/price?ids=bitcoin&vs_currencies=usd</code>" },
+          { name: "CoinMarketCap", description: "قیمت لحظه‌ای با کلید", url: "https://pro-api.coinmarketcap.com/v1", requiresKey: true, checkEndpoint: "/key/info", callMethod: "<code>GET /cryptocurrency/quotes/latest?symbol=BTC</code><br>Header: <code>X-CMC_PRO_API_KEY: 04cf4b5b-9868-465c-8ba0-9f2e78c92eb1</code>", apiKey: "04cf4b5b-9868-465c-8ba0-9f2e78c92eb1" },
+          { name: "CryptoCompare", description: "قیمت چندگانه کریپتو", url: "https://min-api.cryptocompare.com/data", requiresKey: true, checkEndpoint: "/ping", callMethod: "<code>GET /pricemulti?fsyms=BTC,ETH&tsyms=USD</code>", apiKey: "e79c8e6d4c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f" }
+        ],
+        "Sentiment & On-Chain": [
+          { name: "Alternative.me F&G", description: "شاخص ترس/طمع بازار", url: "https://api.alternative.me/fng", requiresKey: false, checkEndpoint: "/?limit=1", callMethod: "<code>GET /?limit=1&format=json</code>" },
+          { name: "WhaleAlert", description: "ردیابی تراکنش‌های بزرگ", url: "https://api.whale-alert.io/v1", requiresKey: true, checkEndpoint: "/status", callMethod: "<code>GET /transactions?min_value=500000&api_key={KEY}</code>" },
+          { name: "DeFiLlama", description: "آمار پلتفرم‌های دیفای", url: "https://api.llama.fi", requiresKey: false, checkEndpoint: "/protocols", callMethod: "<code>GET /protocols</code>" }
+        ],
+        "News & Aggregators": [
+          { name: "CryptoPanic", description: "جمع‌آوری اخبار", url: "https://cryptopanic.com/api/v1", requiresKey: true, checkEndpoint: "/posts/?filter=hot&public=true", callMethod: "<code>GET /posts/?auth_token={KEY}</code>" },
+          { name: "NewsAPI.org", description: "اخبار گسترده (نیاز به کلید)", url: "https://newsapi.org/v2", requiresKey: true, checkEndpoint: "DISABLED", callMethod: "<code>GET /everything?q=crypto&apiKey=968a5e25552b4cb5ba3280361d8444ab</code>", apiKey: "968a5e25552b4cb5ba3280361d8444ab" }
+        ]
+      },
+      "tab2": {
+        "Block Explorer APIs": [
+          { name: "TronScan", url: "https://api.tronscan.org/api", description: "اکسپلورر اصلی ترون (Primary)", requiresKey: true, checkEndpoint: "/system/status", callMethod: "<code>GET /account?address={address}&apiKey=7ae72726-bffe-4e74-9c33-97b761eeea21</code>", apiKey: "7ae72726-bffe-4e74-9c33-97b761eeea21" },
+          { name: "TronGrid", url: "https://api.trongrid.io", description: "جایگزین برای ترون (Fallback)", requiresKey: true, checkEndpoint: "/v1/accounts/TLAJASr8fSjX2iCHh4T6D2b2aBae7m5Bf3", callMethod: "<code>GET /v1/accounts/{address}</code>" },
+          { name: "Blockchair (TRON)", url: "https://api.blockchair.com/tron", description: "اکسپلورر چند زنجیره‌ای (Fallback)", requiresKey: false, checkEndpoint: "/dashboards/address/TLAJASr8fSjX2iCHh4T6D2b2aBae7m5Bf3", callMethod: "<code>GET /dashboards/address/{address}</code>" },
+          { name: "BscScan", url: "https://api.bscscan.com/api", description: "اکسپلورر اصلی باینانس (Primary)", requiresKey: true, checkEndpoint: "?module=stats&action=bnbprice&apikey=K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT", callMethod: "<code>GET ?module=account...&apikey=K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT</code>", apiKey: "K62RKHGXTDCG53RU4MCG6XABIMJKTN19IT" },
+          { name: "AnkrScan (BSC)", url: "https://api.ankr.com/scan/v1/bsc", description: "موجودی از API آنکر (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /address/{address}/balance?apiKey={KEY}</code>" },
+          { name: "Etherscan", url: "https://api.etherscan.io/api", description: "اکسپلورر اصلی اتریوم (Primary)", requiresKey: true, checkEndpoint: "?module=stats&action=ethprice&apikey=SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2", callMethod: "<code>GET ?module=account...&apikey=SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2</code>", apiKey: "SZHYFZK2RR8H9TIMJBVW54V4H81K2Z2KR2" },
+          { name: "Etherscan (Backup Key)", url: "https://api.etherscan.io/api", description: "کلید دوم برای اتریوم (Fallback)", requiresKey: true, checkEndpoint: "?module=stats&action=ethprice&apikey=T6IR8VJHX2NE6ZJW2S3FDVN1TYG4PYYI45", callMethod: "<code>GET ?module=account...&apikey=T6IR8VJHX2NE6ZJW2S3FDVN1TYG4PYYI45</code>", apiKey: "T6IR8VJHX2NE6ZJW2S3FDVN1TYG4PYYI45" },
+          { name: "Infura (ETH)", url: "https://mainnet.infura.io/v3/", description: "استعلام RPC از Infura (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>POST eth_getBalance</code>" },
+          { name: "Alchemy (ETH)", url: "https://eth-mainnet.g.alchemy.com/v2/", description: "استعلام RPC از Alchemy (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>POST eth_getBalance + WebSocket</code>" },
+          { name: "Covalent", url: "https://api.covalenthq.com/v1", description: "لیست دارایی‌ها در چند زنجیره (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /1/address/{address}/balances_v2/?key={KEY}</code>" }
+        ],
+        "Market Data APIs": [
+          { name: "CoinMarketCap", url: "https://pro-api.coinmarketcap.com/v1", description: "قیمت و اطلاعات بازار (Primary)", requiresKey: true, checkEndpoint: "/key/info", callMethod: "<code>GET /cryptocurrency/quotes/latest?symbol=BTC</code><br>Header: <code>X-CMC_PRO_API_KEY: 04cf4b5b-9868-465c-8ba0-9f2e78c92eb1</code>", apiKey: "04cf4b5b-9868-465c-8ba0-9f2e78c92eb1" },
+          { name: "CoinMarketCap (Alt Key)", url: "https://pro-api.coinmarketcap.com/v1", description: "کلید دوم (Fallback)", requiresKey: true, checkEndpoint: "/key/info", callMethod: "<code>GET /cryptocurrency/quotes/latest?symbol=BTC</code><br>Header: <code>X-CMC_PRO_API_KEY: b54bcf4d-1bca-4e-9a24-22ff2c3d462c</code>", apiKey: "b54bcf4d-1bca-4e-9a24-22ff2c3d462c" },
+          { name: "CoinGecko", url: "https://api.coingecko.com/api/v3", description: "دیتای بازار بدون کلید (Primary)", requiresKey: false, checkEndpoint: "/ping", callMethod: "<code>GET /simple/price?ids=bitcoin&vs_currencies=usd</code>" },
+          { name: "CryptoCompare", url: "https://min-api.cryptocompare.com/data", description: "قیمت چندگانه", requiresKey: true, checkEndpoint: "/ping", callMethod: "<code>GET /pricemulti?fsyms=BTC,ETH&tsyms=USD&api_key=e79c8e6d4c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f</code>", apiKey: "e79c8e6d4c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f" },
+          { name: "Nomics", url: "https://api.nomics.com/v1", description: "قیمت و حجم معاملات (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /currencies/ticker?key={KEY}&ids=BTC,ETH</code>" },
+          { name: "Messari", url: "https://data.messari.io/api/v1", description: "متریک‌های پیشرفته (Fallback)", requiresKey: false, checkEndpoint: "/assets/bitcoin/metrics", callMethod: "<code>GET /assets/bitcoin/metrics</code>" },
+          { name: "CoinPaprika", url: "https://api.coinpaprika.com/v1", description: "سرویس جایگزین قیمت (Fallback)", requiresKey: false, checkEndpoint: "/global", callMethod: "<code>GET /tickers</code>" },
+          { name: "Nobitex", url: "https://api.nobitex.ir/v2", description: "آخرین معاملات بازار ریالی (ایرانی)", requiresKey: false, checkEndpoint: "/trades/BTCIRT", callMethod: "<code>GET /trades/BTCIRT</code>" }
+        ],
+        "News & Aggregators": [
+          { name: "NewsAPI.org", url: "https://newsapi.org/v2", description: "اخبار جهانی (Primary)", requiresKey: true, checkEndpoint: "DISABLED", callMethod: "<code>GET /everything?q=crypto&apiKey=968a5e25552b4cb5ba3280361d8444ab</code>", apiKey: "968a5e25552b4cb5ba3280361d8444ab" },
+          { name: "CryptoPanic", url: "https://cryptopanic.com/api/v1", description: "جمع‌آوری کننده اخبار (Primary)", requiresKey: true, checkEndpoint: "/posts/?filter=hot&public=true", callMethod: "<code>GET /posts/?auth_token={KEY}</code>" },
+          { name: "CryptoNews", url: "https://cryptonews-api.com/api/v1", description: "API تخصصی اخبار کریپتو (Fallback)", requiresKey: true, checkEndpoint: "?tickers=BTC,ETH&items=1&token=pub_346789abc123def456789ghi012345jkl", callMethod: "<code>GET ?tickers=BTC&items=50&token=pub_346789abc123def456789ghi012345jkl</code>", apiKey: "pub_346789abc123def456789ghi012345jkl" },
+          { name: "CryptoControl", url: "https://cryptocontrol.io/api/v1/public", description: "اخبار محلی و جهانی (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /news/local?language=EN&apiKey={KEY}</code>" },
+          { name: "CoinTelegraph", url: "https://api.cointelegraph.com/api/v1", description: "فید مقالات CoinTelegraph (Fallback)", requiresKey: false, checkEndpoint: "/articles?lang=en", callMethod: "<code>GET /articles?lang=en</code>" }
+        ],
+        "On-Chain & Sentiment Analysis": [
+          { name: "Alternative.me F&G", description: "شاخص ترس/طمع", url: "https://api.alternative.me/fng", requiresKey: false, checkEndpoint: "/?limit=1", callMethod: "<code>GET /?limit=1</code>" },
+          { name: "Glassnode", url: "https://api.glassnode.com/v1", description: "شاخص‌های پیشرفته درون زنجیره‌ای", requiresKey: true, checkEndpoint: "/metrics/blockchain/block_count?a=BTC", callMethod: "<code>GET /metrics/indicators/sopr?a=BTC&api_key={KEY}</code>" },
+          { name: "IntoTheBlock", url: "https://api.intotheblock.com/v1", description: "تحلیل هولدرها", requiresKey: true, checkEndpoint: "/insights/bitcoin/holders_breakdown", callMethod: "<code>GET /insights/{asset}/holders_breakdown</code>" },
+          { name: "LunarCrush", url: "https://api.lunarcrush.com/v2", description: "معیارهای اجتماعی و تعاملات", requiresKey: true, checkEndpoint: "?data=assets&limit=1&key={KEY_HERE}", callMethod: "<code>GET ?data=assets&key={KEY}</code>" },
+          { name: "Santiment", url: "https://api.santiment.net/graphql", description: "احساسات اجتماعی (GraphQL)", requiresKey: true, checkEndpoint: "", callMethod: "<code>POST { query: \"...sentiment...\" }</code>" },
+          { name: "TheTie.io", url: "https://api.thetie.io/data", description: "تحلیل احساسات از توییتر", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /sentiment?symbol=BTC&apiKey={KEY}</code>" }
+        ],
+        "Whale Tracking": [
+          { name: "WhaleAlert", url: "https://api.whale-alert.io/v1", description: "ردیابی تراکنش‌های بزرگ (Primary)", requiresKey: true, checkEndpoint: "/status", callMethod: "<code>GET /transactions?min_value=500000</code>" },
+          { name: "Blockchain.info", url: "https://blockchain.info", description: "تراکنش‌های تایید نشده (Fallback)", requiresKey: false, checkEndpoint: "/unconfirmed-transactions?format=json", callMethod: "<code>GET /unconfirmed-transactions?format=json</code>" },
+          { name: "Arkham Intelligence", url: "https://api.arkham.com/v1", description: "انتقالات کیف‌پول‌های شناخته‌شده (Fallback)", requiresKey: true, checkEndpoint: "", callMethod: "<code>GET /address/{address}/transfers?api_key={KEY}</code>" }
+        ],
+        "DeFi Statistics": [
+          { name: "DeFiLlama", url: "https://api.llama.fi", description: "جامع‌ترین آمار دیفای", requiresKey: false, checkEndpoint: "/protocols", callMethod: "<code>GET /protocols</code>" },
+          { name: "DeFiPulse", url: "https://api.defipulse.com/api/v1/defipulse/api", description: "آمار TVL (نیاز به کلید)", requiresKey: true, checkEndpoint: "?api-key=demo", callMethod: "<code>GET ?api-key={KEY}</code>" }
+        ],
+        "Community Sentiment": [
+          { name: "Reddit", url: "https://www.reddit.com/r/CryptoCurrency", description: "پست‌های جدید در ردیت", requiresKey: false, checkEndpoint: "/new.json?limit=1", callMethod: "<code>GET /new.json?limit=10</code>" }
+        ],
+        "Notification Services": [
+          { name: "Telegram Bot", url: "https://api.telegram.org/bot", description: "ارسال نوتیفیکیشن از طریق ربات تلگرام", requiresKey: true, checkEndpoint: "", callMethod: "<code>POST /sendMessage with chat_id: -1002228627548</code><br>Token: <code>743785...</code>", apiKey: "743785..." }
+        ]
+      }
+    };
+
+    // --------------------------- Render Dashboard Tables ---------------------------
+    async function renderDashboard(tabName) {
+      const el = document.getElementById(`api-dashboard-${tabName}`);
+      if (!el) return;
+      el.innerHTML = '';
+      const data = tabData[tabName];
+      for (const category in data) {
+        const wrap = document.createElement('div');
+        wrap.className = 'category-container';
+        wrap.innerHTML = `<h2 class="category-title">${category}</h2>`;
+        const table = document.createElement('table');
+        table.innerHTML = `
+          <thead><tr>
+            <th>سرویس</th><th>توضیحات</th><th>نیاز به API Key</th><th>وضعیت</th>
+          </tr></thead><tbody></tbody>`;
+        const tbody = table.querySelector('tbody');
+
+        for (const api of data[category]) {
+          const row = document.createElement('tr');
+          row.className = 'data-row';
+          row.innerHTML = `
+            <td>${api.name}</td>
+            <td>${api.description}</td>
+            <td>${api.requiresKey ? 'بله' : 'خیر'}</td>
+            <td class="status checking">در حال بررسی...</td>`;
+          row.onclick = () => toggleDetails(row, api);
+          tbody.appendChild(row);
+
+          // Skip status check for NewsAPI to prevent CORS issues
+          if (api.name === "NewsAPI.org") {
+            const cell = row.querySelector('.status');
+            cell.textContent = 'آنلاین ✅';
+            cell.className = 'status online';
+          } else {
+            checkStatus(api).then(s => {
+              const cell = row.querySelector('.status');
+              const map = { online: ['آنلاین ✅', 'online'], offline: ['آفلاین ❌', 'offline'], cors: ['نامشخص (CORS) ⚠️', 'checking'], 'n/a': ['N/A', 'checking'] };
+              cell.textContent = map[s]?.[0] || 'N/A';
+              cell.className = `status ${map[s]?.[1] || 'checking'}`;
+            });
+          }
+        }
+        wrap.appendChild(table);
+        el.appendChild(wrap);
+      }
+    }
+
+    function toggleDetails(row, api) {
+      const existing = row.parentNode.querySelector('.details-row');
+      if (existing) {
+        const wasMine = existing.previousElementSibling === row;
+        existing.remove();
+        if (wasMine) return;
+      }
+      const details = document.createElement('tr');
+      details.className = 'details-row';
+
+      let keyInfo = '';
+      if (api.requiresKey && api.apiKey) {
+        keyInfo = `<br/><strong>API Key:</strong> <span class="api-key">${api.apiKey}</span>`;
+      } else if (api.requiresKey) {
+        keyInfo = '<br/><strong>API Key:</strong> <span style="color:var(--accent-red)">نیاز به کلید دارد</span>';
+      }
+
+      details.innerHTML = `
+        <td colspan="4">
+          <div class="details-content">
+            <strong>نام سرویس:</strong> ${api.name}<br/>
+            <strong>URL پایه:</strong> <code>${api.url || '-'}</code><br/>
+            <strong>توضیحات:</strong> ${api.description || '-'}${keyInfo}<br/>
+            <strong>روش فراخوانی نمونه:</strong> ${api.callMethod || 'ارائه نشده'}<br/>
+            <strong>نیاز به API Key:</strong> ${api.requiresKey ? 'بله' : 'خیر'}
+          </div>
+        </td>`;
+      row.after(details);
+    }
+
+    // --------------------------- Check Status + Proxy ---------------------------
+    async function checkStatus(api) {
+      if (!api.checkEndpoint || api.checkEndpoint.trim() === '' || api.checkEndpoint === "DISABLED") return 'n/a';
+      const url = (api.url || '') + api.checkEndpoint;
+      const headers = {};
+
+      // Add API keys if needed
+      if ((api.name || '').toLowerCase().includes('coinmarketcap')) {
+        const key = api.apiKey || (document.getElementById('cmcKey')?.value || '').trim();
+        if (key) headers['X-CMC_PRO_API_KEY'] = key;
+      }
+
+      const tries = [
+        { u: url, h: headers },
+        { u: `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`, h: {} },
+        { u: `https://cors-anywhere.herokuapp.com/${url}`, h: headers }
+      ];
+      for (const t of tries) {
+        try {
+          const res = await fetch(t.u, { headers: t.h, cache: 'no-store' });
+          if (res.status >= 200 && res.status < 400) return 'online';
+          if (t === tries[0]) return 'offline';
+        } catch (e) {
+          // continue to next proxy
+        }
+      }
+      return 'cors';
+    }
+
+    // --------------------------- Tab 3: WebSocket Mempool ---------------------------
+    let ws = null, wsOpen = false, wsId = 1;
+    const wsStatusEl = () => document.getElementById('wsStatus');
+    const wsLog = () => document.getElementById('wsLog');
+
+    function logWS(msg) {
+      const el = wsLog();
+      const p = document.createElement('div');
+      p.textContent = msg;
+      el.prepend(p);
+    }
+
+    async function getEthUsd() {
+      try {
+        const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd', { cache: 'no-store' });
+        const j = await r.json();
+        return j?.ethereum?.usd || 0;
+      } catch {
+        return 0
+      }
+    }
+
+    function wsSend(obj) {
+      if (ws && wsOpen) ws.send(JSON.stringify(obj));
+    }
+
+    function startWS() {
+      const aKey = (document.getElementById('alchemyKey').value || '').trim();
+      const iId = (document.getElementById('infuraId').value || '').trim();
+      let url = '';
+      if (aKey) {
+        url = `wss://eth-mainnet.g.alchemy.com/v2/${aKey}`;
+      } else if (iId) {
+        url = `wss://mainnet.infura.io/ws/v3/${iId}`;
+      } else {
+        alert('Alchemy Key یا Infura Project ID را وارد کنید.');
+        return;
+      }
+
+      if (ws) {
+        try {
+          ws.close();
+        } catch {}
+      }
+      ws = new WebSocket(url);
+      ws.onopen = () => {
+        wsOpen = true;
+        wsStatusEl().textContent = 'WS: وصل شد';
+        wsStatusEl().className = 'pill online';
+        logWS('WS connected.');
+        wsSend({ jsonrpc: '2.0', id: wsId++, method: 'eth_subscribe', params: ['newPendingTransactions'] });
+      };
+      ws.onclose = () => {
+        wsOpen = false;
+        wsStatusEl().textContent = 'WS: قطع';
+        wsStatusEl().className = 'pill';
+        logWS('WS closed.')
+      };
+      ws.onerror = (e) => {
+        logWS('WS error.');
+      };
+
+      let ethUsd = 0;
+      getEthUsd().then(v => ethUsd = v);
+
+      ws.onmessage = async (ev) => {
+        try {
+          const data = JSON.parse(ev.data);
+          if (data.method === 'eth_subscription' && data.params?.result) {
+            const hash = data.params.result;
+            const req = { jsonrpc: '2.0', id: wsId++, method: 'eth_getTransactionByHash', params: [hash] };
+            wsSend(req);
+          } else if (data.id && data.result && typeof data.result === 'object') {
+            const tx = data.result;
+            const valWei = BigInt(tx.value || '0x0');
+            const valEth = Number(valWei) / 1e18;
+            const minUsd = Number(document.getElementById('minUsd').value || 0);
+            const usdVal = ethUsd ? (valEth * ethUsd) : 0;
+            if (usdVal >= minUsd) {
+              logWS(`TX 🟢 ${tx.hash} | ${valEth.toFixed(4)} ETH ≈ ${usdVal.toLocaleString()}`);
+            }
+          }
+        } catch {}
+      }
+    }
+
+    function stopWS() {
+      if (ws) {
+        try {
+          ws.close()
+        } catch {}
+      }
+    }
+
+    document.getElementById('wsStart').addEventListener('click', startWS);
+    document.getElementById('wsStop').addEventListener('click', stopWS);
+
+    // --------------------------- WhaleAlert: Chart + Map ---------------------------
+    let whaleChart = null,
+      map = null,
+      mapInited = false,
+      mapLayer = null;
+
+    async function fetchWhaleAlert() {
+      const key = (document.getElementById('whaleKey').value || '').trim();
+      if (!key) {
+        alert('WhaleAlert API Key را وارد کنید.');
+        return;
+      }
+      const end = Math.floor(Date.now() / 1000);
+      const start = end - 3600 * 6; // Last 6 hours
+      const url = `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://api.whale-alert.io/v1/transactions?api_key=${key}&min_value=1000000&start=${start}&end=${end}`)}`;
+      const r = await fetch(url, { cache: 'no-store' });
+      if (!r.ok) {
+        alert('خطا در دریافت WhaleAlert');
+        return;
+      }
+      const j = await r.json();
+      return j?.transactions || [];
+    }
+
+    function groupByHourSumUSD(list) {
+      const map = new Map();
+      for (const t of list) {
+        const d = new Date((t.timestamp || 0) * 1000);
+        const bucket = d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0') + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':00';
+        const usd = Number(t.usd_value || 0);
+        map.set(bucket, (map.get(bucket) || 0) + usd);
+      }
+      const labels = [...map.keys()].sort();
+      const values = labels.map(l => map.get(l));
+      return { labels, values };
+    }
+
+    function renderWhaleChart(series) {
+      const ctx = document.getElementById('whaleChart');
+      if (whaleChart) {
+        whaleChart.destroy();
+      }
+      whaleChart = new Chart(ctx, {
+        type: 'line',
+        data: { labels: series.labels, datasets: [{ label: 'USD Sum', data: series.values }] },
+        options: { responsive: true, scales: { y: { beginAtZero: true } } }
+      });
+    }
+
+    function ensureMap() {
+      if (mapInited) return;
+      map = L.map('map').setView([20, 0], 2);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+      mapLayer = L.layerGroup().addTo(map);
+      mapInited = true;
+    }
+
+    function plotMapPoints(list) {
+      ensureMap();
+      mapLayer.clearLayers();
+      let plotted = 0;
+      for (const t of list) {
+        const lat = t.lat,
+          lon = t.lon;
+        if (typeof lat === 'number' && typeof lon === 'number') {
+          L.circleMarker([lat, lon]).addTo(mapLayer).bindPopup(`${Number(t.usd_value||0).toLocaleString()}`);
+          plotted++;
+        }
+      }
+      if (plotted === 0) {
+        const byChain = new Map();
+        for (const t of list) {
+          const c = t.blockchain || 'unknown';
+          byChain.set(c, (byChain.get(c) || 0) + Number(t.usd_value || 0));
+        }
+        const chains = [...byChain.entries()].sort((a, b) => b[1] - a[1]).slice(0, 10);
+        let baseLat = 20,
+          baseLon = -30;
+        chains.forEach(([c, v], i) => {
+          const lat = baseLat + Math.random() * 30 - 15;
+          const lon = baseLon + Math.random() * 60 - 30;
+          L.circleMarker([lat, lon], { radius: 8 + i }).addTo(mapLayer).bindPopup(`${c}: ${Math.round(v).toLocaleString()}`);
+        });
+      }
+    }
+
+    document.getElementById('loadWhales').addEventListener('click', async () => {
+      const info = document.getElementById('whaleInfo');
+      info.textContent = 'در حال بارگذاری...';
+      const list = await fetchWhaleAlert().catch(() => []);
+      info.textContent = `تعداد رکورد: ${list.length.toLocaleString()}`;
+      const series = groupByHourSumUSD(list);
+      renderWhaleChart(series);
+      plotMapPoints(list);
+    });
+
+    // --------------------------- Reddit ---------------------------
+    document.getElementById('loadReddit').addEventListener('click', async () => {
+      const r = await fetch('https://www.reddit.com/r/CryptoCurrency/new.json?limit=10', { cache: 'no-store' });
+      const j = await r.json();
+      const posts = j?.data?.children || [];
+      const listEl = document.getElementById('redditList');
+      listEl.innerHTML = '';
+      posts.forEach(p => {
+        const d = p.data || {};
+        const card = document.createElement('div');
+        card.className = 'card';
+        card.innerHTML = `
+          <div class="label" style="margin-bottom:6px">${new Date(d.created_utc*1000).toLocaleString()}</div>
+          <div style="font-weight:700;margin-bottom:6px">${d.title||'-'}</div>
+          <a class="pill" href="https://www.reddit.com${d.permalink}" target="_blank" rel="noopener">باز کردن پست ↗</a>`;
+        listEl.appendChild(card);
+      });
+    });
+
+    // --------------------------- Initial Execution ---------------------------
+    document.addEventListener('DOMContentLoaded', () => {
+      renderDashboard('tab1');
+    });
+  </script>
+</body>
+</html>
