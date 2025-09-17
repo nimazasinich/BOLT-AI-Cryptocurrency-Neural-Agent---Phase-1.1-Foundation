@@ -436,4 +436,8 @@ chmod +x fix-app.sh
 **Created**: September 17, 2025  
 **Version**: 1.0  
 **Target Environment**: Node.js v20.19.1, StackBlitz  
+<<<<<<< HEAD
 **Primary Fix**: Switch from `ts-node/esm` to `tsx` for ESM compatibility
+=======
+**Primary Fix**: Switch from `ts-node/esm` to `tsx` for ESM compatibility
+>>>>>>> cursor/resolve-node-js-project-errors-with-a-detailed-prompt-e3c0
