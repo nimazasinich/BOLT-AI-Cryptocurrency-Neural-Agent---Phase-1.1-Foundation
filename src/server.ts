@@ -19,9 +19,6 @@ import { BacktestEngine } from './ai/BacktestEngine.js';
 import { FeatureEngineering } from './ai/FeatureEngineering.js';
 import { AlertService } from './services/AlertService.js';
 import { NotificationService } from './services/NotificationService.js';
-import { TrainingEngine } from './ai/TrainingEngine.js';
-import { BullBearAgent } from './ai/BullBearAgent.js';
-import { FeatureEngineering } from './ai/FeatureEngineering.js';
 
 const app = express();
 const server = createServer(app);
@@ -44,9 +41,6 @@ const trainingEngine = TrainingEngine.getInstance();
 const bullBearAgent = BullBearAgent.getInstance();
 const backtestEngine = BacktestEngine.getInstance();
 const featureEngineering = FeatureEngineering.getInstance();
-const trainingEngine = TrainingEngine.getInstance();
-const bullBearAgent = BullBearAgent.getInstance();
-const featureEngineering = FeatureEngineering.getInstance();
 
 // Setup alert notifications
 alertService.subscribe(async (alert) => {
@@ -67,12 +61,6 @@ database.initialize().catch(error => {
 marketDataIngestion.initialize().catch(error => {
   logger.error('Failed to initialize market data ingestion', {}, error);
   // Don't exit - continue with basic functionality
-});
-
-// Initialize AI systems
-bullBearAgent.initialize().catch(error => {
-  logger.error('Failed to initialize Bull/Bear agent', {}, error);
-  // Continue without AI - system can still function
 });
 
 // Initialize AI systems
@@ -364,121 +352,6 @@ app.post('/api/ai/create-network', (req, res) => {
     logger.error('Failed to create network', {}, error as Error);
     res.status(500).json({
       error: 'Failed to create network',
-      message: (error as Error).message
-    });
-  }
-});
-
-// AI Training endpoints
-app.post('/api/ai/train-step', async (req, res) => {
-  try {
-    const { batchSize = 32 } = req.body;
-    
-    // Get experiences from buffer
-    const bufferStats = trainingEngine.experienceBuffer.getStatistics();
-    if (bufferStats.size < batchSize) {
-      return res.status(400).json({
-        error: 'Insufficient experiences in buffer',
-        required: batchSize,
-        available: bufferStats.size
-      });
-    }
-    
-    const batch = trainingEngine.experienceBuffer.sampleBatch(batchSize);
-    const metrics = await trainingEngine.trainStep(batch.experiences);
-    
-    res.json({
-      success: true,
-      metrics,
-      bufferStats,
-      timestamp: Date.now()
-    });
-  } catch (error) {
-    logger.error('Failed to perform training step', {}, error as Error);
-    res.status(500).json({
-      error: 'Failed to perform training step',
-      message: (error as Error).message
-    });
-  }
-});
-
-app.post('/api/ai/train-epoch', async (req, res) => {
-  try {
-    const epochMetrics = await trainingEngine.trainEpoch();
-    
-    res.json({
-      success: true,
-      epochMetrics,
-      trainingState: trainingEngine.getTrainingState(),
-      timestamp: Date.now()
-    });
-  } catch (error) {
-    logger.error('Failed to train epoch', {}, error as Error);
-    res.status(500).json({
-      error: 'Failed to train epoch',
-      message: (error as Error).message
-    });
-  }
-});
-
-// Bull/Bear prediction endpoint
-app.post('/api/ai/predict', async (req, res) => {
-  try {
-    const { symbol, goal } = req.body;
-    
-    if (!symbol) {
-      return res.status(400).json({
-        error: 'Symbol is required'
-      });
-    }
-    
-    // Get recent market data
-    const marketData = await database.getMarketData(symbol.toUpperCase(), '1h', 100);
-    
-    if (marketData.length < 50) {
-      return res.status(400).json({
-        error: 'Insufficient market data for prediction',
-        available: marketData.length,
-        required: 50
-      });
-    }
-    
-    const prediction = await bullBearAgent.predict(marketData, goal);
-    
-    res.json({
-      success: true,
-      symbol: symbol.toUpperCase(),
-      prediction,
-      timestamp: Date.now()
-    });
-  } catch (error) {
-    logger.error('Failed to generate prediction', { symbol: req.body.symbol }, error as Error);
-    res.status(500).json({
-      error: 'Failed to generate prediction',
-      message: (error as Error).message
-    });
-  }
-});
-
-// Feature extraction endpoint
-app.post('/api/ai/extract-features', async (req, res) => {
-  try {
-    const { symbol } = req.body;
-    
-    const marketData = await database.getMarketData(symbol.toUpperCase(), '1h', 100);
-    const features = featureEngineering.extractAllFeatures(marketData);
-    
-    res.json({
-      success: true,
-      symbol: symbol.toUpperCase(),
-      features,
-      featureCount: features.length,
-      timestamp: Date.now()
-    });
-  } catch (error) {
-    logger.error('Failed to extract features', { symbol: req.body.symbol }, error as Error);
-    res.status(500).json({
-      error: 'Failed to extract features',
       message: (error as Error).message
     });
   }
